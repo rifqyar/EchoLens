@@ -1,61 +1,38 @@
-import Icon from '@react-native-vector-icons/material-icons'
-import { useNavigation } from '@react-navigation/native'
-import { Button, Layout, Text } from '@ui-kitten/components'
-import { PropsWithChildren } from 'react'
-import {
-  StatusBar,
-  StyleProp,
-  ViewStyle,
-} from 'react-native'
+import React, { PropsWithChildren } from 'react';
+import { StyleProp, ViewStyle, StatusBar } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import { Appbar } from 'react-native-paper';
 
-export const AppHeader = (
-  props: PropsWithChildren & {
-    goBackNavigation?: () => void
-    withBack?: boolean
-    title?: any
-    style?: StyleProp<ViewStyle>
-  }
-) => {
-  const navigation = useNavigation()
+type AppHeaderProps = PropsWithChildren & {
+  goBackNavigation?: () => void;
+  withBack?: boolean;
+  title?: string;
+  style?: StyleProp<ViewStyle>;
+};
+
+export const AppHeader = (props: AppHeaderProps) => {
+  const navigation = useNavigation();
 
   return (
-    <Layout
-      style={{
-        flexDirection: 'row',
-        alignItems: 'center',
-        flexWrap: 'wrap',
-        paddingTop: (StatusBar.currentHeight ?? 0) + 12,
-        paddingBottom: 12,
-        ...(props.style ?? ({} as any)),
-      }}
+    <Appbar.Header
+      style={[
+        {
+          paddingTop: (StatusBar.currentHeight ?? 0), // Sesuaikan untuk Android
+        },
+        props.style as any,
+      ]}
     >
-      {props.withBack ? (
-        <Button
-          size="small"
-          appearance="ghost"
-          style={{ backgroundColor: 'transparent' }}
-          accessoryLeft={
-            <Icon name="arrow-back" size={18}></Icon>
-          }
+      {props.withBack && (
+        <Appbar.BackAction
           onPress={() =>
             props.goBackNavigation
               ? props.goBackNavigation()
               : navigation.goBack()
           }
-        ></Button>
-      ) : (
-        ''
+        />
       )}
-      {props.title && (
-        <Text
-          style={{
-            fontWeight: 'bold',
-          }}
-        >
-          {props.title}
-        </Text>
-      )}
+      {props.title && <Appbar.Content title={props.title} />}
       {props.children}
-    </Layout>
-  )
-}
+    </Appbar.Header>
+  );
+};
