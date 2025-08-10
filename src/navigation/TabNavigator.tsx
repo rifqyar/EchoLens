@@ -13,8 +13,8 @@ export const TabNavigator = memo((props: {
 }) => {
   const { initRouteName } = props
   // Memoized components to prevent unnecessary re-renders
+  const theme = useTheme()
   const MemoizedHomeHeader = memo(() => {
-    const theme = useTheme()
     return (
       <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: "space-between", width: '100%' }}>
         <View>
@@ -65,12 +65,11 @@ export const TabNavigator = memo((props: {
         options={{
           headerTitleAlign: 'left',
           headerTitle: () => <MemoizedHomeHeader />,
-        }}
-        initialParams={{
+          headerStyle: {
+            backgroundColor: theme.colors.secondary, // warna header
+          },
+          tabBarLabel: 'home',
           title: 'Home',
-          stackName: 'Home',
-          icon: 'home-outline',
-          isPopup: false
         }}
       />
     </Tab.Navigator>

@@ -7,13 +7,11 @@ import { memo, useEffect, useRef } from 'react'
 import { Alert, BackHandler } from 'react-native'
 import LoginScreen from '../screens/LoginScreen'
 import { TabNavigator } from './TabNavigator'
+import StackBottomTabBar from '../components/layout/StackBottomTabBar'
 
 type MainStackParamList = {
   Login: undefined
-  Home: undefined
-  Gallery: undefined
-  Ai: undefined
-  Profile: undefined
+  Main: undefined
 }
 
 const MainStack =
@@ -88,16 +86,16 @@ const AppNavigator = memo(
       >
         <MainStack.Navigator
           screenOptions={mainStackOptions}
-          initialRouteName={isLoggedIn ? 'Home' : 'Login'}
+          initialRouteName={isLoggedIn ? 'Main' : 'Login'}
         >
           <MainStack.Screen
             name="Login"
             component={LoginScreen}
           />
           <MainStack.Screen
-            name={'Home'}
+            name={'Main'}
             children={() => (
-              <TabNavigator initRouteName={'HomeTab'} />
+              <StackBottomTabBar initRouteName={0} />
             )}
             options={{ headerShown: false }}
           />

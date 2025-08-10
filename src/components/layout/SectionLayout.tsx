@@ -6,21 +6,29 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 type SectionLayoutProps = PropsWithChildren & {
   title?: string | React.ReactNode;
   style?: StyleProp<ViewStyle>;
-  edges?: Array<'top' | 'right' | 'bottom' | 'left'>; // SafeArea edges
-  elevation?: number; // optional elevation
+  edges?: Array<'top' | 'right' | 'bottom' | 'left'>;
+  elevation?: number;
+  horizontalPadding?: number; // padding kiri-kanan tambahan
 };
 
 export const SectionLayout = ({
   title,
   style,
   children,
-  edges = ['left', 'right'], // default hanya kiri-kanan supaya section bisa rapat ke atas/bawah
+  edges = ['left', 'right'],
   elevation = 0,
+  horizontalPadding = 1, // default jarak 16px dari kiri-kanan
 }: SectionLayoutProps) => {
   const theme = useTheme();
 
   return (
-    <SafeAreaView edges={edges} style={{ flex: 0 }}>
+    <SafeAreaView
+      edges={edges}
+      style={{
+        flex: 0,
+        paddingHorizontal: horizontalPadding,
+      }}
+    >
       <Surface style={[styles.container, style]} elevation={elevation as any}>
         {title ? (
           typeof title === 'string' ? (

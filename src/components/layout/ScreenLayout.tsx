@@ -4,12 +4,13 @@ import {
   ImageBackground,
   ScrollView,
   StyleProp,
+  StyleSheet,
   View,
   ViewStyle,
 } from 'react-native';
 import { Surface, useTheme } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { LoadingIndicator } from './LoadingIndicator'
+import { LoadingIndicator } from './LoadingIndicator';
 
 type ScreenLayoutProps = PropsWithChildren & {
   style?: StyleProp<ViewStyle>;
@@ -20,7 +21,7 @@ type ScreenLayoutProps = PropsWithChildren & {
   withBackgroundImg?: boolean;
   refreshControlActions?: any;
   containerBackgroundColor?: boolean;
-  edges?: Array<'top' | 'right' | 'bottom' | 'left'>; // custom edges SafeArea
+  edges?: Array<'top' | 'right' | 'bottom' | 'left'>;
 };
 
 export const ScreenLayout = ({
@@ -33,9 +34,9 @@ export const ScreenLayout = ({
   scrollThrottle,
   refreshControlActions,
   containerBackgroundColor = true,
-  edges = ['top', 'left', 'right'], // default tanpa bottom agar scroll tetap full
+  edges = ['left', 'right'],
 }: ScreenLayoutProps) => {
-  const setLoading = false
+  const setLoading =false;
   const theme = useTheme();
 
   useFocusEffect(
@@ -93,8 +94,15 @@ export const ScreenLayout = ({
       {withBackgroundImg ? (
         <ImageBackground
           style={{ flex: 1 }}
-          source={require('../../assets/img/main-bg.png')}
+          source={require('../../assets/img/main-bg.jpg')}
         >
+          {/* Overlay hitam transparan */}
+          <View
+            style={{
+              ...StyleSheet.absoluteFillObject,
+              backgroundColor: 'rgba(0,0,0,0.4)', // 40% transparan
+            }}
+          />
           {isLoading ? (
             <LoadingIndicator hasMore={false} visible={isLoading} />
           ) : (

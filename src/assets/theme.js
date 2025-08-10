@@ -31,8 +31,9 @@ export const Resize = (size) => {
 const colorScheme = Appearance.getColorScheme()
 export const COLORS = {
   // base colors
-  primary: '#24C16B', // green
-  secondary: '#F0F0F0', // dark green
+  primary: '#f7503e', // green
+  secondary: '#230634', // dark green
+  tertiary: '#4602f8',
   white: '#FFFFFF',
   black: '#000000',
   blackLighten: '#181818',
