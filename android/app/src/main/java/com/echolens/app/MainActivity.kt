@@ -1,4 +1,4 @@
-package com.echolens
+package com.echolens.app
 
 import com.facebook.react.ReactActivity
 import com.facebook.react.ReactActivityDelegate

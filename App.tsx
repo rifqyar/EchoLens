@@ -4,6 +4,8 @@ import { Alert, Linking, LogBox, Platform } from 'react-native';
 import { checkVersion } from "react-native-check-version";
 import { MD3LightTheme, PaperProvider } from 'react-native-paper';
 import AppProvider from './src/provider/AppProvider';
+import { Provider } from 'react-redux';
+import store from './src/redux/store';
 
 function App(): React.JSX.Element {
   const theme = {
@@ -49,9 +51,11 @@ function App(): React.JSX.Element {
   }
 
   return (
-    <PaperProvider theme={theme}>
-      <AppProvider />
-    </PaperProvider>
+    <Provider store={store}>
+      <PaperProvider theme={theme}>
+        <AppProvider />
+      </PaperProvider>
+    </Provider>
   )
 }
 
