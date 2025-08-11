@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import { Surface, useTheme } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { LoadingIndicator } from './LoadingIndicator';
+import { LoadingIndicator } from '../common/LoadingIndicator';
 
 type ScreenLayoutProps = PropsWithChildren & {
   style?: StyleProp<ViewStyle>;

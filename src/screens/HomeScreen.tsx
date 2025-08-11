@@ -1,17 +1,23 @@
 import { StatusBar, StyleSheet, Text, View } from 'react-native'
 import React, { useEffect } from 'react'
-import { useIsFocused } from '@react-navigation/native'
+import { useIsFocused, useNavigation, NavigationProp } from '@react-navigation/native'
 import { Badge, Button, Surface, useTheme } from 'react-native-paper'
 import { SectionLayout } from '../components/layout/SectionLayout'
 import { ScreenLayout } from '../components/layout/ScreenLayout'
 import { AppHeader } from '../components/layout/AppHeader'
 import { COLORS } from '../assets/theme'
 import MaterialDesignIcons from '@react-native-vector-icons/material-design-icons'
+import { useAppSelector } from '../redux/store'
+
+type RootStackParamList = {
+  LiveControl: undefined;
+  // add other routes here if needed
+};
 
 const HomeScreen = () => {
   const isFocused = useIsFocused()
   const theme = useTheme()
-
+  const navigation = useNavigation<NavigationProp<RootStackParamList>>()
 
   useEffect(() => {
     StatusBar.setTranslucent(true);
@@ -64,7 +70,7 @@ const HomeScreen = () => {
           <Button
             mode="contained"
             onPress={() => {
-              // Navigate to AI Screen
+              navigation.navigate('LiveControl')
             }}
             style={{
               width: '20%', flex: 1, aspectRatio: 1.5,
@@ -146,6 +152,44 @@ const HomeScreen = () => {
               borderRadius: 10,
             }}>
               <Text style={{ color: COLORS.lightTeal, fontSize: 10 }}>Available</Text>
+            </View>
+          </View>
+
+          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+              <MaterialDesignIcons name='play-circle-outline' size={24} color={COLORS.lightPurple} />
+              <Text style={{ color: theme.colors.surface }}>Live Control</Text>
+            </View>
+
+            <View style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              borderColor: COLORS.lightGrey,
+              borderWidth: 1,
+              paddingHorizontal: 10,
+              paddingVertical: 5,
+              borderRadius: 10,
+            }}>
+              <Text style={{ color: COLORS.lightGrey, fontSize: 10 }}>Device Not Connected</Text>
+            </View>
+          </View>
+
+          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+              <MaterialDesignIcons name='play-circle-outline' size={24} color={COLORS.lightPurple} />
+              <Text style={{ color: theme.colors.surface }}>Stream Video</Text>
+            </View>
+
+            <View style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              borderColor: COLORS.lightGrey,
+              borderWidth: 1,
+              paddingHorizontal: 10,
+              paddingVertical: 5,
+              borderRadius: 10,
+            }}>
+              <Text style={{ color: COLORS.lightGrey, fontSize: 10 }}>Device Not Connected</Text>
             </View>
           </View>
         </Surface>

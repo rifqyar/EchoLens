@@ -7,11 +7,25 @@ import { SectionLayout } from '../components/layout/SectionLayout'
 import { Section } from 'react-native-paper/lib/typescript/components/Drawer/Drawer'
 import { StackNavigationProp } from '@react-navigation/stack'
 import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-signin'
+import { useDispatch } from 'react-redux'
+import { loading, notLoading } from '../redux/actions/loadingAction'
+import LoadingScreen from '../components/common/LoadingScreen'
+import { useAppSelector } from '../redux/store'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 
 type RootStackParamList = {
   Login: undefined
   Main: undefined;
 }
+
+// Tipe data untuk user
+interface User {
+  id?: number
+  email?: string
+  name?: string
+  photo?: number
+}
+
 
 type LoginScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Login'>
 type LoginScreenRouteProp = RouteProp<RootStackParamList, 'Login'>
@@ -24,7 +38,11 @@ interface LoginScreenProps {
 const LoginScreen = ({ navigation }: LoginScreenProps) => {
   const theme = useTheme()
   const isFocused = useIsFocused()
-  console.log(process.env.GOOGLE_WEBCLIENT_ID)
+  const dispatch = useDispatch()
+  const isLoading = useAppSelector(
+    (store) => store.loading.loading
+  )
+
   const webClientId = process.env.GOOGLE_WEBCLIENT_ID || '195136459550-51p74b3v4fd6235m9tg9lgc4i90len3c.apps.googleusercontent.com'
 
   useEffect(() => {
@@ -40,11 +58,30 @@ const LoginScreen = ({ navigation }: LoginScreenProps) => {
   }, [])
 
   const googleLogin = async () => {
+    dispatch(loading())
     try {
       await GoogleSignin.hasPlayServices();
       const userInfo = await GoogleSignin.signIn();
-      console.log("userinfo", userInfo);
 
+      const user = userInfo.data?.user
+      const dataUser = {
+        id: user?.id,
+        email: user?.email,
+        name: user?.familyName + ' ' + user?.givenName,
+        photo: user?.photo,
+      }
+
+      await AsyncStorage.setItem(
+        'user',
+        JSON.stringify(dataUser)
+      )
+
+      dispatch({
+        type: 'LOGIN_SUCCESS',
+        payload: { user: dataUser },
+      })
+
+      navigation.navigate('Main');
     } catch (error) {
       if (typeof error === 'object' && error !== null && 'code' in error) {
         const err = error as { code: string };
@@ -60,6 +97,8 @@ const LoginScreen = ({ navigation }: LoginScreenProps) => {
         console.log(error);
       }
     }
+
+    dispatch(notLoading())
   };
 
   return (
@@ -90,6 +129,7 @@ const LoginScreen = ({ navigation }: LoginScreenProps) => {
             Aplikasi ini masih dalam tahap pengembangan. Beberapa fitur mungkin belum tersedia.
           </Text>
         </SectionLayout>
+        {isLoading && <LoadingScreen withBackground={true} />}
       </View>
     </ScreenLayout>
   )

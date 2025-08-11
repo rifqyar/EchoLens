@@ -15,7 +15,7 @@ const menus: {
   routeName: string;
 }[] = [
     { key: 'home', title: 'Home', icon: 'home', routeName: 'HomeScreen' },
-    { key: 'ai', title: 'AI', icon: 'robot-excited', routeName: 'AIScreen' }, // replaced 'list-alt'
+    // { key: 'ai', title: 'AI', icon: 'robot-excited', routeName: 'AIScreen' }, // replaced 'list-alt'
     { key: 'gallery', title: 'Gallery', icon: 'image', routeName: 'GalleryScreen' },
     { key: 'profile', title: 'Profile', icon: 'account', routeName: 'ProfileScreen' },
   ];
@@ -25,7 +25,7 @@ const HomeScreenStack = () => {
   const theme = useTheme();
   const MemoizedHomeHeader = memo(() => {
     return (
-      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: "space-between", width: '100%', marginLeft: -35 }}>
+      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: "space-between", width: '100%' }}>
         <View>
           <Image
             source={require('../../assets/img/logo-full.png')}

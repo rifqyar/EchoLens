@@ -9,6 +9,7 @@ import userReducer from './reducers/userReducer'
 import { TypedUseSelectorHook, useDispatch, useSelector } from 'react-redux'
 import trackingReducer from './reducers/trackingReducer'
 import documentListReducer from './reducers/documentListReducer'
+import smartFeatureReducer from './reducers/smartFeatureReducer'
 
 const reducer = combineReducers({
   loading: loadingReducer,
@@ -16,7 +17,8 @@ const reducer = combineReducers({
   modal: modalReducer,
   snackbar: snackbarReducer,
   tracking: trackingReducer,
-  documentList: documentListReducer
+  documentList: documentListReducer,
+  smartFeatureReducer: smartFeatureReducer
 })
 const store = configureStore({
   reducer

@@ -8,10 +8,12 @@ import { Alert, BackHandler } from 'react-native'
 import LoginScreen from '../screens/LoginScreen'
 import { TabNavigator } from './TabNavigator'
 import StackBottomTabBar from '../components/layout/StackBottomTabBar'
+import LiveControlScreen from '../screens/LiveControlScreen'
 
 type MainStackParamList = {
   Login: undefined
   Main: undefined
+  LiveControl: undefined
 }
 
 const MainStack =
@@ -21,7 +23,7 @@ const MainStack =
 const AppNavigator = memo(
   (props: { isLoggedIn: boolean }) => {
     const { isLoggedIn } = props
-    console.log(props)
+
     const navigationRef =
       useRef<NavigationContainerRef<any>>(null)
     const routeNameRef = useRef<string | undefined>(
@@ -98,6 +100,10 @@ const AppNavigator = memo(
               <StackBottomTabBar initRouteName={0} />
             )}
             options={{ headerShown: false }}
+          />
+          <MainStack.Screen
+            name={'LiveControl'}
+            component={LiveControlScreen}
           />
         </MainStack.Navigator>
       </NavigationContainer>

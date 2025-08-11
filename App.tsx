@@ -1,6 +1,6 @@
 
 import React, { useEffect } from 'react'
-import { Alert, Linking, LogBox, Platform } from 'react-native';
+import { Alert, Linking, LogBox, PermissionsAndroid, Platform } from 'react-native';
 import { checkVersion } from "react-native-check-version";
 import { MD3LightTheme, PaperProvider } from 'react-native-paper';
 import AppProvider from './src/provider/AppProvider';
@@ -24,7 +24,28 @@ function App(): React.JSX.Element {
     // BootSplash.hide({ fade: true });
 
     checkAppVersion()
+    requestMicrophonePermission()
   }, [])
+
+  // Request microphone permission
+  async function requestMicrophonePermission() {
+    if (Platform.OS !== 'android') return true;
+
+    try {
+      const granted = await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.RECORD_AUDIO,
+        {
+          title: 'Microphone Permission',
+          message: 'This app needs access to your microphone for speech recognition',
+          buttonPositive: 'OK',
+        }
+      );
+      return granted === PermissionsAndroid.RESULTS.GRANTED;
+    } catch (err) {
+      console.warn(err);
+      return false;
+    }
+  }
 
   const checkAppVersion = async () => {
     const version = await checkVersion();
