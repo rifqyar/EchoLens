@@ -73,17 +73,13 @@ const LiveControlScreen = () => {
     }
   }
 
-  // const toggleListening = async () => {
-  //   try {
-  //     if (isListening) {
-  //       await VoiceToText.stopListening();
-  //     } else {
-  //       await VoiceToText.startListening();
-  //     }
-  //   } catch (error) {
-  //     console.error(error);
-  //   }
-  // };
+  const toggleListening = async () => {
+    try {
+      console.log('Toggling listening:', !started);
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   // const stopRecognizing = async () => {
   //   try {
@@ -270,9 +266,7 @@ const LiveControlScreen = () => {
                   marginHorizontal: 20,
                   backgroundColor: COLORS.primary,
                 }}
-                onPress={() => {
-                  // Handle voice to component action
-                }}>
+                onPress={toggleListening}>
                 Start Listening
               </Button>
             </SectionLayout>
