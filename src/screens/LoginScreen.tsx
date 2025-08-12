@@ -43,7 +43,7 @@ const LoginScreen = ({ navigation }: LoginScreenProps) => {
     (store) => store.loading.loading
   )
 
-  const webClientId = process.env.GOOGLE_WEBCLIENT_ID
+  const webClientId = process.env.GOOGLE_WEBCLIENT_ID || '195136459550-51p74b3v4fd6235m9tg9lgc4i90len3c.apps.googleusercontent.com'
 
   useEffect(() => {
     StatusBar.setTranslucent(true);
