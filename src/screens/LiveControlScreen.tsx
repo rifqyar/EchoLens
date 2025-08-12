@@ -1,4 +1,4 @@
-import { StatusBar, StyleSheet, TouchableOpacity, View } from 'react-native'
+import { Platform, StatusBar, StyleSheet, TouchableOpacity, View } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { useIsFocused } from '@react-navigation/native'
 import { Button, Surface, Switch, Text, Title, useTheme } from 'react-native-paper'
@@ -10,6 +10,8 @@ import MaterialDesignIcons from '@react-native-vector-icons/material-design-icon
 import { useAppSelector } from '../redux/store'
 import { useDispatch } from 'react-redux'
 import { setAutoTranslationDisabled, setAutoTranslationEnabled, setVoiceToTextDisabled, setVoiceToTextEnabled } from '../redux/actions/smartFeatureAction'
+import { addEventListener, destroy, startListening, stopListening } from '@ascendtis/react-native-voice-to-text';
+import { PermissionsAndroid, Alert } from 'react-native';
 
 const LiveControlScreen = () => {
   const isFocused = useIsFocused()
@@ -29,33 +31,33 @@ const LiveControlScreen = () => {
     StatusBar.setBarStyle('light-content');
   }, [isFocused])
 
-  // useEffect(() => {
-  //   // Set up event listeners
-  //   const resultsListener = VoiceToText.addEventListener(
-  //     VoiceToTextEvents.RESULTS,
-  //     (event) => {
-  //       setResults(event.value);
-  //     }
-  //   );
+  useEffect(() => {
+    // Set up event listeners
+    const resultsListener = addEventListener(
+      'RESULTS',
+      (event) => {
+        setResults(event.value);
+      }
+    );
 
-  //   const startListener = VoiceToText.addEventListener(
-  //     VoiceToTextEvents.START,
-  //     () => setIsListening(true)
-  //   );
+    const startListener = addEventListener(
+      'START',
+      () => setIsListening(true)
+    );
 
-  //   const endListener = VoiceToText.addEventListener(
-  //     VoiceToTextEvents.END,
-  //     () => setIsListening(false)
-  //   );
+    const endListener = addEventListener(
+      'END',
+      () => setIsListening(false)
+    );
 
-  //   // Clean up
-  //   return () => {
-  //     VoiceToText.destroy();
-  //     resultsListener.remove();
-  //     startListener.remove();
-  //     endListener.remove();
-  //   };
-  // }, []);
+    // Clean up
+    return () => {
+      destroy();
+      resultsListener.remove();
+      startListener.remove();
+      endListener.remove();
+    };
+  }, []);
 
   const handleVoiceToTextToggle = () => {
     if (!voiceToTextEnabled) {
@@ -73,9 +75,49 @@ const LiveControlScreen = () => {
     }
   }
 
+  const checkAndroidPermission = async () => {
+    if (Platform.OS === 'android') {
+      try {
+        const granted = await PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.RECORD_AUDIO,
+          {
+            title: 'Microphone Permission',
+            message: 'This app needs access to your microphone to convert voice to text.',
+            buttonNeutral: 'Ask Me Later',
+            buttonNegative: 'Cancel',
+            buttonPositive: 'OK',
+          }
+        );
+        if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+          return true;
+        } else {
+          Alert.alert(
+            'Permission Required',
+            'Please allow microphone access to use voice-to-text feature.'
+          );
+          return false;
+        }
+      } catch (err) {
+        Alert.alert('Permission Error', 'Failed to request microphone permission.');
+        return false;
+      }
+    }
+  }
+
   const toggleListening = async () => {
     try {
-      console.log('Toggling listening:', !started);
+      if (isListening) {
+        await stopListening();
+        setIsListening(false);
+        setStarted(false);
+        console.log('results', results);
+      } else {
+        setResults('');
+        setError(null);
+        setStarted(true);
+        await startListening();
+        setIsListening(true);
+      }
     } catch (error) {
       console.error(error);
     }
@@ -255,21 +297,25 @@ const LiveControlScreen = () => {
         {/* Voice to Component Action */}
         {
           voiceToTextEnabled && (
-            <SectionLayout edges={['left', 'right']} style={{ marginTop: 20 }}>
-              <Text variant={'titleMedium'} style={{ color: theme.colors.surface, marginLeft: 20 }}>
-                Voice to Text Action
-              </Text>
-              <Button
-                mode="contained"
-                style={{
-                  marginTop: 20,
-                  marginHorizontal: 20,
-                  backgroundColor: COLORS.primary,
-                }}
-                onPress={toggleListening}>
-                Start Listening
-              </Button>
-            </SectionLayout>
+            <>
+              <SectionLayout edges={['left', 'right']} style={{ marginTop: 20 }}>
+                <Text variant={'titleMedium'} style={{ color: theme.colors.surface, marginLeft: 20 }}>
+                  Voice to Text Action
+                </Text>
+                <Button
+                  mode="contained"
+                  style={{
+                    marginTop: 20,
+                    marginHorizontal: 20,
+                    backgroundColor: COLORS.primary,
+                  }}
+                  onPress={toggleListening}>
+                  {isListening ? 'Stop' : 'Start'} Listening
+                </Button>
+              </SectionLayout>
+
+              <Text style={{ color: COLORS.white }}>{results}</Text>
+            </>
           )
         }
       </ScreenLayout >
