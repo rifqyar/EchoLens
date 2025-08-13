@@ -9,11 +9,15 @@ import LoginScreen from '../screens/LoginScreen'
 import { TabNavigator } from './TabNavigator'
 import StackBottomTabBar from '../components/layout/StackBottomTabBar'
 import LiveControlScreen from '../screens/LiveControlScreen'
+import PairDeviceScreenOnBoard from '../screens/PairDeviceScreenOnBoard'
+import PairDeviceScreen from '../screens/PairDeviceScreen'
 
 type MainStackParamList = {
   Login: undefined
   Main: undefined
   LiveControl: undefined
+  PairDeviceOnBoard: undefined
+  PairDeviceScreen: undefined
 }
 
 const MainStack =
@@ -100,6 +104,14 @@ const AppNavigator = memo(
               <StackBottomTabBar initRouteName={0} />
             )}
             options={{ headerShown: false }}
+          />
+          <MainStack.Screen
+            name={'PairDeviceOnBoard'}
+            component={PairDeviceScreenOnBoard}
+          />
+          <MainStack.Screen
+            name={'PairDeviceScreen'}
+            component={PairDeviceScreen}
           />
           <MainStack.Screen
             name={'LiveControl'}

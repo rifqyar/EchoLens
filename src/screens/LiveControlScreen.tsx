@@ -1,4 +1,4 @@
-import { StatusBar, StyleSheet, TouchableOpacity, View } from 'react-native'
+import { Alert, Platform, ScrollView, StatusBar, StyleSheet, TouchableOpacity, View } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { useIsFocused } from '@react-navigation/native'
 import { Button, Surface, Switch, Text, Title, useTheme } from 'react-native-paper'
@@ -10,6 +10,8 @@ import MaterialDesignIcons from '@react-native-vector-icons/material-design-icon
 import { useAppSelector } from '../redux/store'
 import { useDispatch } from 'react-redux'
 import { setAutoTranslationDisabled, setAutoTranslationEnabled, setVoiceToTextDisabled, setVoiceToTextEnabled } from '../redux/actions/smartFeatureAction'
+import RNFS from 'react-native-fs';
+import axios from 'axios'
 
 const LiveControlScreen = () => {
   const isFocused = useIsFocused()
@@ -18,44 +20,19 @@ const LiveControlScreen = () => {
   const voiceToTextEnabled = useAppSelector(state => state.smartFeatureReducer.voiceToTextFeature);
   const autoTranslationEnabled = useAppSelector(state => state.smartFeatureReducer.autoTranslateFeature);
 
-  const [started, setStarted] = useState(false);
-  const [results, setResults] = useState('');
-  const [error, setError] = useState(null);
-  const [isListening, setIsListening] = useState(false);
+  type Transcription = {
+    original: string;
+    translated: string;
+    lang: string;
+  };
+
+  const [transcriptions, setTranscriptions] = useState<Transcription[]>([]);
 
   useEffect(() => {
     StatusBar.setTranslucent(true);
     StatusBar.setBackgroundColor(theme.colors.secondary);
     StatusBar.setBarStyle('light-content');
   }, [isFocused])
-
-  // useEffect(() => {
-  //   // Set up event listeners
-  //   const resultsListener = VoiceToText.addEventListener(
-  //     VoiceToTextEvents.RESULTS,
-  //     (event) => {
-  //       setResults(event.value);
-  //     }
-  //   );
-
-  //   const startListener = VoiceToText.addEventListener(
-  //     VoiceToTextEvents.START,
-  //     () => setIsListening(true)
-  //   );
-
-  //   const endListener = VoiceToText.addEventListener(
-  //     VoiceToTextEvents.END,
-  //     () => setIsListening(false)
-  //   );
-
-  //   // Clean up
-  //   return () => {
-  //     VoiceToText.destroy();
-  //     resultsListener.remove();
-  //     startListener.remove();
-  //     endListener.remove();
-  //   };
-  // }, []);
 
   const handleVoiceToTextToggle = () => {
     if (!voiceToTextEnabled) {
@@ -73,26 +50,52 @@ const LiveControlScreen = () => {
     }
   }
 
-  const toggleListening = async () => {
+  const sendAudioToAPI = async () => {
     try {
-      console.log('Toggling listening:', !started);
+      // Path di assets (Android) harus pakai asset://
+      const assetPath = 'asset:/jfk.wav';
+
+      // Path tujuan copy ke cache directory supaya bisa diakses sebagai file
+      const destPath = `${RNFS.CachesDirectoryPath}/jfk.wav`;
+
+      // Copy file dari asset ke cache (hanya jika belum ada)
+      const fileExists = await RNFS.exists(destPath);
+      if (!fileExists) {
+        await RNFS.copyFileAssets('jfk.wav', destPath);
+      }
+
+      const formData = new FormData();
+      formData.append('audio_file', {
+        uri: `file://${destPath}`,
+        name: Platform.OS == 'android' ? 'audio.wav' : 'audio.wav',
+        type: 'audio/wav',
+      });
+
+      console.log(formData)
+      const response = await axios.post(
+        'http://172.20.10.2:4053/transcribe_translate/',
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        },
+      );
+
+      console.log(response)
+      if (response.data) {
+        setTranscriptions((prev) => [
+          ...prev,
+          {
+            original: response.data.original_text,
+            translated: response.data.translated_text,
+            lang: response.data.detected_lang,
+          },
+        ]);
+      }
     } catch (error) {
-      console.error(error);
+      console.log('Send audio error:', error);
     }
-  };
-
-  // const stopRecognizing = async () => {
-  //   try {
-  //     await VoiceToText.stopListening();
-  //     setStarted(false);
-  //   } catch (e: any) {
-  //     setError(e.message);
-  //   }
-  // };
-
-  const clear = () => {
-    setResults('');
-    setError(null);
   };
 
   return (
@@ -184,6 +187,31 @@ const LiveControlScreen = () => {
                 color: theme.colors.surface
               }}>Record Video</Text>
             </View>
+            <View style={{
+              flexDirection: 'column',
+              alignItems: 'center',
+            }}>
+              <TouchableOpacity
+                style={{
+                  width: 80,
+                  height: 80,
+                  borderRadius: 40,
+                  backgroundColor: COLORS.darkBlue,
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                }}
+                onPress={() => {
+                  // Handle trigger action
+                }}
+              >
+                <MaterialDesignIcons name='microphone-outline' size={30} color={COLORS.white} />
+              </TouchableOpacity>
+              <Text style={{
+                textAlign: 'center',
+                marginTop: 15,
+                color: theme.colors.surface
+              }}>Record Audio</Text>
+            </View>
           </View>
         </SectionLayout>
 
@@ -266,7 +294,7 @@ const LiveControlScreen = () => {
                   marginHorizontal: 20,
                   backgroundColor: COLORS.primary,
                 }}
-                onPress={toggleListening}>
+                onPress={() => sendAudioToAPI()}>
                 Start Listening
               </Button>
             </SectionLayout>

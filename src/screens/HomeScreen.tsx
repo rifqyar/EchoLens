@@ -11,6 +11,7 @@ import { useAppSelector } from '../redux/store'
 
 type RootStackParamList = {
   LiveControl: undefined;
+  PairDeviceOnBoard: undefined;
   // add other routes here if needed
 };
 
@@ -45,21 +46,18 @@ const HomeScreen = () => {
           <Text style={{ fontSize: 18, fontWeight: 'bold', color: theme.colors.surface }}>
             Smart Glasses Status
           </Text>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-            <MaterialDesignIcons name='wifi' size={28} color={COLORS.accentTeal} />
-            <Text style={{ color: COLORS.accentTeal }}>Connected</Text>
-          </View>
+          <Text style={{ color: COLORS.accentTeal }}>Device Not Connected</Text>
+
           <Button
             mode='contained'
-            icon={'close-circle'}
             onPress={() => {
-              // Handle button press
+              navigation.navigate('PairDeviceOnBoard')
             }}
             style={{ width: '100%' }}
             labelStyle={{ fontSize: 16, color: theme.colors.onPrimary }}
             buttonColor={theme.colors.primary}
           >
-            Disconnect
+            Pair Device
           </Button>
         </Surface>
       </SectionLayout>
@@ -79,7 +77,7 @@ const HomeScreen = () => {
             buttonColor={COLORS.accentTeal}
             labelStyle={{ fontSize: 14, color: theme.colors.onPrimary }}
           >
-            <View style={{ flexDirection: 'column', alignItems: 'center', gap: 10 }}>
+            <View style={{ flexDirection: 'column', alignItems: 'center', gap: 10, width: '100%' }}>
               <MaterialDesignIcons name='play-circle-outline' size={28} color={theme.colors.onPrimary} />
               <Text style={{ marginLeft: 5, color: theme.colors.onPrimary, fontSize: 18 }}>Live Control</Text>
             </View>
@@ -96,7 +94,7 @@ const HomeScreen = () => {
             buttonColor={COLORS.accentTeal}
             labelStyle={{ fontSize: 14, color: theme.colors.onPrimary }}
           >
-            <View style={{ flexDirection: 'column', alignItems: 'center', gap: 10 }}>
+            <View style={{ flexDirection: 'column', alignItems: 'center', gap: 10, width: '100%' }}>
               <MaterialDesignIcons name='image' size={28} color={theme.colors.onPrimary} />
               <Text style={{ marginLeft: 5, color: theme.colors.onPrimary, fontSize: 18 }}>Gallery</Text>
             </View>
