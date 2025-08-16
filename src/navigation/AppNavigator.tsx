@@ -11,6 +11,7 @@ import StackBottomTabBar from '../components/layout/StackBottomTabBar'
 import LiveControlScreen from '../screens/LiveControlScreen'
 import PairDeviceScreenOnBoard from '../screens/PairDeviceScreenOnBoard'
 import PairDeviceScreen from '../screens/PairDeviceScreen'
+import ScanDevicesScreen from '../screens/ScanDeviceScreen'
 
 type MainStackParamList = {
   Login: undefined
@@ -18,6 +19,7 @@ type MainStackParamList = {
   LiveControl: undefined
   PairDeviceOnBoard: undefined
   PairDeviceScreen: undefined
+  ScanDeviceScreen: undefined
 }
 
 const MainStack =
@@ -108,6 +110,10 @@ const AppNavigator = memo(
           <MainStack.Screen
             name={'PairDeviceOnBoard'}
             component={PairDeviceScreenOnBoard}
+          />
+          <MainStack.Screen
+            name={'ScanDeviceScreen'}
+            component={ScanDevicesScreen}
           />
           <MainStack.Screen
             name={'PairDeviceScreen'}

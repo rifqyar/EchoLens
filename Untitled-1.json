@@ -1,0 +1,343 @@
+{
+    "characteristics": [
+        {
+            "properties": {
+                "Write": "Write",
+                "Read": "Read"
+            },
+            "characteristic": "2a00",
+            "service": "1800"
+        },
+        {
+            "properties": {
+                "WriteWithoutResponse": "WriteWithoutResponse"
+            },
+            "characteristic": "ae01",
+            "service": "ae30"
+        },
+        {
+            "descriptors": [
+                {
+                    "value": null,
+                    "uuid": "2902"
+                }
+            ],
+            "properties": {
+                "Notify": "Notify"
+            },
+            "characteristic": "ae02",
+            "service": "ae30"
+        },
+        {
+            "properties": {
+                "WriteWithoutResponse": "WriteWithoutResponse"
+            },
+            "characteristic": "ae03",
+            "service": "ae30"
+        },
+        {
+            "descriptors": [
+                {
+                    "value": null,
+                    "uuid": "2902"
+                }
+            ],
+            "properties": {
+                "Notify": "Notify"
+            },
+            "characteristic": "ae04",
+            "service": "ae30"
+        },
+        {
+            "descriptors": [
+                {
+                    "value": null,
+                    "uuid": "2902"
+                }
+            ],
+            "properties": {
+                "Indicate": "Indicate"
+            },
+            "characteristic": "ae05",
+            "service": "ae30"
+        },
+        {
+            "properties": {
+                "Write": "Write",
+                "Read": "Read"
+            },
+            "characteristic": "ae10",
+            "service": "ae30"
+        },
+        {
+            "descriptors": [
+                {
+                    "value": null,
+                    "uuid": "2902"
+                }
+            ],
+            "properties": {
+                "Notify": "Notify",
+                "Write": "Write",
+                "Read": "Read"
+            },
+            "characteristic": "4a02",
+            "service": "3802"
+        },
+        {
+            "properties": {
+                "WriteWithoutResponse": "WriteWithoutResponse"
+            },
+            "characteristic": "ae3b",
+            "service": "ae3a"
+        },
+        {
+            "descriptors": [
+                {
+                    "value": null,
+                    "uuid": "2902"
+                }
+            ],
+            "properties": {
+                "Notify": "Notify"
+            },
+            "characteristic": "ae3c",
+            "service": "ae3a"
+        },
+        {
+            "descriptors": [
+                {
+                    "value": null,
+                    "uuid": "2902"
+                }
+            ],
+            "properties": {
+                "Indicate": "Indicate"
+            },
+            "characteristic": "2a05",
+            "service": "1801"
+        },
+        {
+            "properties": {
+                "Write": "Write",
+                "WriteWithoutResponse": "WriteWithoutResponse"
+            },
+            "characteristic": "6e400002-b5a3-f393-e0a9-e50e24dcca9e",
+            "service": "6e40fff0-b5a3-f393-e0a9-e50e24dcca9e"
+        },
+        {
+            "descriptors": [
+                {
+                    "value": null,
+                    "uuid": "2902"
+                }
+            ],
+            "properties": {
+                "Notify": "Notify"
+            },
+            "characteristic": "6e400003-b5a3-f393-e0a9-e50e24dcca9e",
+            "service": "6e40fff0-b5a3-f393-e0a9-e50e24dcca9e"
+        },
+        {
+            "properties": {
+                "Write": "Write",
+                "WriteWithoutResponse": "WriteWithoutResponse"
+            },
+            "characteristic": "de5bf72a-d711-4e47-af26-65e3012a5dc7",
+            "service": "de5bf728-d711-4e47-af26-65e3012a5dc7"
+        },
+        {
+            "descriptors": [
+                {
+                    "value": null,
+                    "uuid": "2902"
+                }
+            ],
+            "properties": {
+                "Notify": "Notify"
+            },
+            "characteristic": "de5bf729-d711-4e47-af26-65e3012a5dc7",
+            "service": "de5bf728-d711-4e47-af26-65e3012a5dc7"
+        },
+        {
+            "properties": {
+                "Read": "Read"
+            },
+            "characteristic": "2a25",
+            "service": "180a"
+        },
+        {
+            "properties": {
+                "Read": "Read"
+            },
+            "characteristic": "2a27",
+            "service": "180a"
+        },
+        {
+            "properties": {
+                "Read": "Read"
+            },
+            "characteristic": "2a26",
+            "service": "180a"
+        },
+        {
+            "properties": {
+                "Read": "Read"
+            },
+            "characteristic": "2a23",
+            "service": "180a"
+        },
+        {
+            "descriptors": [
+                {
+                    "value": null,
+                    "uuid": "2902"
+                }
+            ],
+            "properties": {
+                "Notify": "Notify",
+                "Write": "Write",
+                "Read": "Read"
+            },
+            "characteristic": "fee3",
+            "service": "fee1"
+        }
+    ],
+    "services": [
+        {
+            "uuid": "1800"
+        },
+        {
+            "uuid": "ae30"
+        },
+        {
+            "uuid": "3802"
+        },
+        {
+            "uuid": "ae3a"
+        },
+        {
+            "uuid": "1801"
+        },
+        {
+            "uuid": "6e40fff0-b5a3-f393-e0a9-e50e24dcca9e"
+        },
+        {
+            "uuid": "de5bf728-d711-4e47-af26-65e3012a5dc7"
+        },
+        {
+            "uuid": "180a"
+        },
+        {
+            "uuid": "fee1"
+        }
+    ],
+    "advertising": {
+        "manufacturerData": {
+            "1234": {
+                "bytes": [],
+                "data": "",
+                "CDVType": "ArrayBuffer"
+            }
+        },
+        "txPowerLevel": -2147483648,
+        "isConnectable": true,
+        "serviceData": {
+            "3802": {
+                "bytes": [
+                    29,
+                    30,
+                    243,
+                    216,
+                    253,
+                    140
+                ],
+                "data": "HR7z2P2M",
+                "CDVType": "ArrayBuffer"
+            }
+        },
+        "localName": "G300_FD8C",
+        "serviceUUIDs": [],
+        "manufacturerRawData": {
+            "bytes": [
+                0,
+                0,
+                18,
+                52
+            ],
+            "data": "AAASNA==",
+            "CDVType": "ArrayBuffer"
+        },
+        "rawData": {
+            "bytes": [
+                2,
+                1,
+                10,
+                10,
+                9,
+                71,
+                51,
+                48,
+                48,
+                95,
+                70,
+                68,
+                56,
+                67,
+                9,
+                22,
+                2,
+                56,
+                29,
+                30,
+                243,
+                216,
+                253,
+                140,
+                3,
+                255,
+                52,
+                18,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0
+            ],
+            "data": "AgEKCglHMzAwX0ZEOEMJFgI4HR7z2P2MA/80EgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=",
+            "CDVType": "ArrayBuffer"
+        }
+    },
+    "name": "G300_FD8C",
+    "rssi": -47,
+    "id": "1D:1E:F3:D8:FD:8C"
+}

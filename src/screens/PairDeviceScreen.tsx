@@ -6,7 +6,7 @@ import LottieView from 'lottie-react-native';
 import { COLORS } from '../assets/theme';
 import { SectionLayout } from '../components/layout/SectionLayout';
 import { useIsFocused } from '@react-navigation/native';
-import { connectToBluetoothClassic, scanBluetoothClassic, startScan } from '../ble/BLEManager';
+import { connectToBluetoothClassic, scanBluetoothClassic } from '../ble/BLEManager';
 import { BluetoothDevice } from 'react-native-bluetooth-classic';
 import { Button, Surface, Text } from 'react-native-paper';
 

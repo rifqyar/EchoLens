@@ -10,6 +10,7 @@ import { NavigationProp, useNavigation } from '@react-navigation/native'
 
 type RootStackParamList = {
   PairDeviceScreen: undefined;
+  ScanDeviceScreen: undefined;
   // add other routes here if needed
 };
 
@@ -19,7 +20,7 @@ const PairDeviceScreenOnBoard = () => {
   return (
     <>
       <AppHeader withBack />
-      <ScreenLayout scrollable={true} withBackgroundImg style={{
+      <ScreenLayout withBackgroundImg style={{
         paddingTop: 0,
         paddingBottom: 0,
       }}>
@@ -49,7 +50,7 @@ const PairDeviceScreenOnBoard = () => {
           <Button
             mode='contained'
             onPress={() => {
-              navigation.navigate('PairDeviceScreen')
+              navigation.navigate('ScanDeviceScreen')
             }}
             style={{ width: '100%', marginBottom: 35 }}
             labelStyle={{ fontSize: 16, color: '#FFF' }}

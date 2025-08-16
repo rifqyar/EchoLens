@@ -1,5 +1,5 @@
-import { StatusBar, StyleSheet, Text, View } from 'react-native'
-import React, { useEffect } from 'react'
+import { Image, StatusBar, StyleSheet, Text, View } from 'react-native'
+import React, { useEffect, useState } from 'react'
 import { useIsFocused, useNavigation, NavigationProp } from '@react-navigation/native'
 import { Badge, Button, Surface, useTheme } from 'react-native-paper'
 import { SectionLayout } from '../components/layout/SectionLayout'
@@ -8,6 +8,9 @@ import { AppHeader } from '../components/layout/AppHeader'
 import { COLORS } from '../assets/theme'
 import MaterialDesignIcons from '@react-native-vector-icons/material-design-icons'
 import { useAppSelector } from '../redux/store'
+import AsyncStorage from '@react-native-async-storage/async-storage'
+import BleManager from 'react-native-ble-manager';
+import { useDispatch } from 'react-redux'
 
 type RootStackParamList = {
   LiveControl: undefined;
@@ -19,12 +22,34 @@ const HomeScreen = () => {
   const isFocused = useIsFocused()
   const theme = useTheme()
   const navigation = useNavigation<NavigationProp<RootStackParamList>>()
+  const device = useAppSelector((state) => state.deviceConnectionReducer?.device)
+  const [deviceLocalState, setDeviceLocalState] = useState(device)
+  const dispacth = useDispatch()
 
   useEffect(() => {
     StatusBar.setTranslucent(true);
     StatusBar.setBackgroundColor(theme.colors.secondary);
     StatusBar.setBarStyle('light-content');
+    if (isFocused) {
+      setConnectedDeviceToLocalStorage()
+    }
   }, [isFocused])
+
+  const setConnectedDeviceToLocalStorage = () => {
+    if (device) {
+      AsyncStorage.setItem('deviceConnect', JSON.stringify(device))
+      console.log(Object.keys(deviceLocalState).length)
+    }
+  }
+
+  const disconnectDevice = async () => {
+    setDeviceLocalState({})
+    await BleManager.disconnect(device.id);
+    dispacth({
+      type: 'DISCONNET_DEVICE',
+      payload: {}
+    })
+  }
 
   return (
     <ScreenLayout scrollable={true} style={{
@@ -39,28 +64,48 @@ const HomeScreen = () => {
           width: '90%',
           alignSelf: 'center',
           padding: 20,
-          backgroundColor: COLORS.accentBlackLighten,
+          backgroundColor: COLORS.lightGrey,
           borderRadius: 10,
           gap: 20
         }}>
-          <Text style={{ fontSize: 18, fontWeight: 'bold', color: theme.colors.surface }}>
+          <Text style={{ fontSize: 18, fontWeight: 'bold', color: theme.colors.onSurface }}>
             Smart Glasses Status
           </Text>
-          <Text style={{ color: COLORS.accentTeal }}>Device Not Connected</Text>
+          {
+            Object.keys(deviceLocalState).length > 0 ? (
+              <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                <Image source={require('../assets/img/logo-alt.png')} style={{ width: '70%', height: 100, resizeMode: 'contain' }} />
+                <Text style={{ fontSize: 18, fontWeight: 'bold', color: theme.colors.onSurface }}>
+                  {device.name}
+                </Text>
+                <Text style={{ fontSize: 12, color: theme.colors.onSurface }}>
+                  Device Connected
+                </Text>
+              </View>
+            ) : (
+              <Text style={{ color: COLORS.accentTeal }}>Device Not Connected</Text>
+            )
+          }
 
           <Button
             mode='contained'
             onPress={() => {
-              navigation.navigate('PairDeviceOnBoard')
+              if (Object.keys(deviceLocalState).length > 0) {
+                disconnectDevice()
+              } else {
+                navigation.navigate('PairDeviceOnBoard')
+              }
             }}
             style={{ width: '100%' }}
             labelStyle={{ fontSize: 16, color: theme.colors.onPrimary }}
             buttonColor={theme.colors.primary}
           >
-            Pair Device
+            {Object.keys(deviceLocalState).length > 0 ? 'Unpair Device' : 'Pair Device'}
           </Button>
         </Surface>
       </SectionLayout>
+
+      {/* Check if Device is pairing */}
 
       {/* Main Menu */}
       <SectionLayout style={{ marginTop: 20, alignItems: 'center' }} edges={['left', 'right']} horizontalPadding={19}>
