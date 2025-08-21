@@ -105,7 +105,7 @@ const LoginScreen = ({ navigation }: LoginScreenProps) => {
     <ScreenLayout withBackgroundImg>
       <View style={{ flex: 1, justifyContent: 'center' }}>
         <SectionLayout>
-          <Text style={styles.title}>ECHO LENS</Text>
+          <Text style={styles.title}>OPTI LENS</Text>
           <Text style={styles.subtitle}>CONNECT, CREATE, CONTROL</Text>
         </SectionLayout>
 
@@ -142,7 +142,7 @@ const styles = StyleSheet.create({
     fontSize: 45,
     fontWeight: '900',
     color: '#adadadff',
-    letterSpacing: 3,
+    letterSpacing: 4,
     textAlign: 'center',
   },
   subtitle: {

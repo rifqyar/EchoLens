@@ -23,7 +23,7 @@ import BleManager, {
 import { loading, notLoading } from '../redux/actions/loadingAction'
 import { Buffer } from 'buffer';
 import { useBatteryLevel } from '../ble/BatteryLevel'
-
+import RNBluetoothClassic from 'react-native-bluetooth-classic';
 
 type RootStackParamList = {
   LiveControl: undefined;
@@ -99,6 +99,7 @@ const HomeScreen = () => {
   const disconnectDevice = async () => {
     setDeviceLocalState({})
     await BleManager.disconnect(device.id);
+    await RNBluetoothClassic.connectToDevice(device.id);
     dispacth({
       type: 'DISCONNET_DEVICE',
       payload: {}

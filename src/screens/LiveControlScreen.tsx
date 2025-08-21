@@ -16,8 +16,8 @@ import BleManager from 'react-native-ble-manager';
 import { useSmartGlassesTrigger } from '../ble/TriggerEvents'
 import BluetoothSco from '../ble/BluetoothSco'
 import AudioRecorderPlayer from 'react-native-audio-recorder-player';
-import RNFetchBlob from 'rn-fetch-blob';
 import { Buffer } from 'buffer'
+import AudioRecord from 'react-native-audio-record';
 
 const audioRecorderPlayer = AudioRecorderPlayer;
 
@@ -27,13 +27,19 @@ const LiveControlScreen = () => {
   const dispatch = useDispatch()
   const voiceToTextEnabled = useAppSelector(state => state.smartFeatureReducer.voiceToTextFeature);
   const autoTranslationEnabled = useAppSelector(state => state.smartFeatureReducer.autoTranslateFeature);
-  const [ready, setReady] = useState(false);
   const [recording, setRecording] = useState(false);
   const [recordingVideo, setRecodingVideo] = useState(false);
   const [recordingAudio, setRecodingAudio] = useState(false);
   const device = useAppSelector((state) => state.deviceConnectionReducer?.device)
   const { triggerCapture, triggerStartVideo, triggerStopVideo, triggerStartAudio, triggerStopAudio } = useSmartGlassesTrigger(device.id);
+  const ws = useRef<WebSocket | null>(null);
+  const [message, setMessage] = useState<string[]>([]);
 
+  // state untuk menampung teks realtime
+  const [partialOriginal, setPartialOriginal] = useState("");
+  const [partialTranslated, setPartialTranslated] = useState("");
+  const [finalOriginal, setFinalOriginal] = useState("");
+  const [finalTranslated, setFinalTranslated] = useState("");
 
   type Transcription = {
     original: string;
@@ -60,13 +66,67 @@ const LiveControlScreen = () => {
     return () => sub.remove();
   }, []);
 
+  /** Lama */
+  // const handleVoiceToTextToggle = () => {
+  //   if (!voiceToTextEnabled) {
+  //     dispatch(setVoiceToTextEnabled())
+  //     ws.current = new WebSocket("ws://172.20.10.2:4053/ws/transcribe");
+
+  //     ws.current.onopen = () => {
+  //       console.log("Connected to Python server");
+  //     };
+
+  //     ws.current.onmessage = (e) => {
+  //       const msg = JSON.parse(e.data);
+  //       if (msg.type === "transcript") {
+  //         setMessage(msg.text);
+  //       }
+  //     };
+
+  //     ws.current.onerror = (e) => console.error("WS Error", e);
+  //     ws.current.onclose = () => console.log("WS Closed");
+  //   } else {
+  //     ws.current?.close();
+  //     dispatch(setVoiceToTextDisabled())
+  //   }
+  // }
+
+  // ======================
+  // Toggle Voice-to-Text
+  // ======================
+
   const handleVoiceToTextToggle = () => {
     if (!voiceToTextEnabled) {
-      dispatch(setVoiceToTextEnabled())
+      dispatch(setVoiceToTextEnabled());
+
+      ws.current = new WebSocket("ws://192.168.18.198:4053/ws/transcribe");
+
+      ws.current.onopen = () => {
+        console.log("Connected to Python server ✅ (waiting to start recording)");
+      };
+
+      ws.current.onmessage = (e) => {
+        const msg = JSON.parse(e.data);
+
+        if (msg.type === "partial") {
+          setPartialOriginal(prev => (prev + " " + (msg.original_text || "")).trim());
+          setPartialTranslated(prev => (prev + " " + (msg.translated_text || "")).trim());
+        }
+
+        if (msg.type === "done") {
+          console.log("✅ Done received, ready for new session");
+        }
+      };
+
+      ws.current.onerror = (e) => console.error("WS Error", e);
+      ws.current.onclose = () => console.log("WS Closed");
     } else {
-      dispatch(setVoiceToTextDisabled())
+      // pastikan stop recording juga saat toggle off
+      stopRecording();
+      ws.current?.close();
+      dispatch(setVoiceToTextDisabled());
     }
-  }
+  };
 
   const handleAutoTranslationToggle = () => {
     if (!autoTranslationEnabled) {
@@ -150,33 +210,96 @@ const LiveControlScreen = () => {
     return true;
   }
 
+  // ======================
+  // Start Recording
+  // ======================
   const startRecording = async () => {
-    try {
-      const hasPermission = await requestStoragePermission();
-      if (hasPermission) {
-        BluetoothSco.startSco(); // aktifkan mic Bluetooth
-
-        const dirs = RNFetchBlob.fs.dirs;
-        const path = `${dirs.DownloadDir}/recording_${Date.now()}.mp4`;
-        const uri = await audioRecorderPlayer.startRecorder(path);
-        console.log('Recording at:', uri);
-        setRecording(true);
+    if (ws.current && ws.current.readyState === WebSocket.OPEN) {
+      const startSco = async () => {
+        // BluetoothSco.startSco(); // aktifkan mic Bluetooth
+        BluetoothSco.stopSco(); // aktifkan mic Bluetooth
       }
-    } catch (error) {
-      console.error('Error starting recording:', error);
+
+      setPartialOriginal('')
+      setPartialTranslated('')
+      const hasPermission = await requestStoragePermission();
+      
+      if (hasPermission) {
+        await startSco()
+        console.log('🎙️ Start Recording...');
+        ws.current.send(JSON.stringify({ type: "start" })); // ✅ kasih tahu server
+        AudioRecord.init({
+          sampleRate: 16000, // whisper butuh 16kHz
+          channels: 1,
+          bitsPerSample: 16,
+          wavFile: 'test.wav',
+        });
+
+        // ambil data PCM dari native modul
+        AudioRecord.on('data', (data: string) => {
+          if (ws.current && ws.current.readyState === WebSocket.OPEN) {
+            ws.current.send(JSON.stringify({
+              type: 'audio_chunk',
+              data: data, // base64 PCM string
+            }));
+          }
+        });
+
+        AudioRecord.start();
+        setRecording(true);
+      } else {
+        console.warn("⚠️ WebSocket belum siap, nyalakan dulu toggle VoiceToText");
+      }
     }
   };
 
+  /** Use react - native - audio - recorder - player */
+  // const startRecording = async () => {
+  // try {
+  //   const result = await recorder.startRecorder();
+  //   const hasPermission = await requestStoragePermission();
+  //   if (hasPermission) {
+  //     BluetoothSco.startSco(); // aktifkan mic Bluetooth
+
+  //     const dirs = RNFetchBlob.fs.dirs;
+  //     const path = `${dirs.DownloadDir}/recording_${Date.now()}.mp4`;
+  //     const uri = await audioRecorderPlayer.startRecorder(path);
+  //     console.log('Recording at:', uri);
+  //     setRecording(true);
+  //   }
+  // } catch (error) {
+  //   console.error('Error starting recording:', error);
+  // }
+  // };
+
+  // ======================
+  // Stop Recording
+  // ======================
   const stopRecording = async () => {
-    try {
-      const result = await audioRecorderPlayer.stopRecorder();
-      console.log('Stopped at:', result);
-      BluetoothSco.stopSco(); // matikan SCO
-      setRecording(false);
-    } catch (error) {
-      console.error('Error stopping recording:', error);
+    console.log('⏹️ Stop Recording...');
+    const filePath = await AudioRecord.stop();
+    console.log('Saved file:', filePath);
+
+    // Matikan listener supaya nggak kirim chunk lagi
+    AudioRecord.on('data', () => { }); // reset callback jadi kosong
+
+    if (ws.current && ws.current.readyState === WebSocket.OPEN) {
+      ws.current.send(JSON.stringify({ type: 'end' }));
     }
+
+    setRecording(false);
   };
+  /** Use react-native-audio-recorder */
+  // const stopRecording = async () => {
+  // try {
+  //   const result = await audioRecorderPlayer.stopRecorder();
+  //   console.log('Stopped at:', result);
+  //   BluetoothSco.stopSco(); // matikan SCO
+  //   setRecording(false);
+  // } catch (error) {
+  //   console.error('Error stopping recording:', error);
+  // }
+  // };
 
   const recordVideo = async () => {
     if (!recordingVideo) {
@@ -208,29 +331,10 @@ const LiveControlScreen = () => {
         title="Live Control"
         withBack
       />
-      <ScreenLayout scrollable={true} style={{
-        backgroundColor: COLORS.blackLighten,
+      <ScreenLayout withBackgroundImg scrollable={true} style={{
         paddingTop: 0,
         paddingBottom: 0,
       }}>
-        {/* Live Feed */}
-        <SectionLayout>
-          <Surface style={{
-            marginTop: 20,
-            width: '90%',
-            alignSelf: 'center',
-            padding: 20,
-            backgroundColor: COLORS.accentBlackLighten,
-            borderRadius: 10,
-            gap: 20
-          }}>
-            <Text style={{ fontSize: 18, fontWeight: 'bold', color: theme.colors.surface }}>
-              Live Feed
-            </Text>
-            {/* Add live feed component here */}
-          </Surface>
-        </SectionLayout>
-
         {/* Trigger Button */}
         <SectionLayout>
           <View style={{
@@ -341,7 +445,7 @@ const LiveControlScreen = () => {
                 <MaterialDesignIcons name='microphone-outline' size={16} color={theme.colors.onPrimary} />
                 <View>
                   <Text style={{ fontSize: 16, color: theme.colors.surface }}>
-                    Voice-to-Text
+                    Voice-to-Text & Auto Translation
                   </Text>
                   <Text style={{ fontSize: 12, color: COLORS.Grey }}>
                     Convert voice to text
@@ -351,63 +455,71 @@ const LiveControlScreen = () => {
               <Switch value={voiceToTextEnabled} onValueChange={handleVoiceToTextToggle} />;
             </View>
           </Surface>
-
-          <Surface style={{
-            marginTop: 20,
-            alignSelf: 'center',
-            width: '90%',
-            padding: 20,
-            backgroundColor: COLORS.accentBlackLighten,
-            borderRadius: 10,
-          }}>
-            <View style={{
-              flexDirection: 'row',
-              justifyContent: 'space-between',
-              flexWrap: 'wrap',
-              alignItems: 'center',
-            }}>
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-                <MaterialDesignIcons name='microphone-outline' size={16} color={theme.colors.onPrimary} />
-                <View>
-                  <Text style={{ fontSize: 16, color: theme.colors.surface }}>
-                    Auto Translation
-                  </Text>
-                  <Text style={{ fontSize: 12, color: COLORS.Grey }}>
-                    Real-time language translation
-                  </Text>
-                </View>
-              </View>
-              <Switch value={autoTranslationEnabled} onValueChange={handleAutoTranslationToggle} />;
-            </View>
-          </Surface>
         </SectionLayout>
 
         {/* Voice to Component Action */}
         {
           voiceToTextEnabled && (
-            <SectionLayout edges={['left', 'right']} style={{ marginTop: 20 }}>
-              <Text variant={'titleMedium'} style={{ color: theme.colors.surface, marginLeft: 20 }}>
-                Voice to Text Action
-              </Text>
-              <Button
-                mode="contained"
-                style={{
-                  marginTop: 20,
+            <>
+              <SectionLayout edges={['left', 'right']} style={{ marginTop: 20 }}>
+                <Text variant={'titleMedium'} style={{ color: theme.colors.surface, marginLeft: 20 }}>
+                  Voice to Text Action
+                </Text>
+                <Button
+                  mode="contained"
+                  style={{
+                    marginTop: 20,
+                    marginHorizontal: 20,
+                    backgroundColor: COLORS.primary,
+                  }}
+                  onPress={() => {
+                    if (!recording) {
+                      setRecording(!recording)
+                      startRecording()
+                    } else {
+                      setRecording(!recording)
+                      stopRecording()
+                    }
+                  }}>
+                  {recording ? 'Stop Listening' : 'Start Listening'}
+                </Button>
+              </SectionLayout>
+
+              <SectionLayout edges={['left', 'right']} style={{ marginTop: 20 }}>
+                {/* teks realtime */}
+                {/* {partialOriginal ? ( */}
+                <Surface style={{
                   marginHorizontal: 20,
-                  backgroundColor: COLORS.primary,
-                }}
-                onPress={() => {
-                  if (!recording) {
-                    setRecording(!recording)
-                    startRecording()
-                  } else {
-                    setRecording(!recording)
-                    stopRecording()
-                  }
+                  padding: 20,
+                  borderRadius: 10,
                 }}>
-                {recording ? 'Stop Listening' : 'Start Listening'}
-              </Button>
-            </SectionLayout>
+                  {/* <View> */}
+                  {/* <Text variant='titleMedium'>
+                        Realtime Original :
+                      </Text> */}
+                  <Text variant='bodyMedium'>
+                    {partialOriginal}
+                  </Text>
+                  {/* </View> */}
+                </Surface>
+                <Surface style={{
+                  marginHorizontal: 20,
+                  padding: 20,
+                  borderRadius: 10,
+                  marginTop: 20
+                }}>
+                  {/* <View style={{marginTop: 20}}> */}
+                  {/* <Text variant='titleMedium'>
+                        Realtime Translation :
+                      </Text> */}
+                  <Text variant='bodyMedium'>
+                    {partialTranslated}
+                  </Text>
+                  {/* </View> */}
+                </Surface>
+                {/* ) : null} */}
+              </SectionLayout>
+            </>
           )
         }
       </ScreenLayout >
