@@ -1,4 +1,4 @@
-package com.echolens.app
+package com.optilens.app
 
 import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.ReactContextBaseJavaModule

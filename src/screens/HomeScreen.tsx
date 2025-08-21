@@ -1,4 +1,4 @@
-import { Image, StatusBar, StyleSheet, Text, View } from 'react-native'
+import { Image, StatusBar, StyleSheet, Text, View, NativeEventEmitter, NativeModules, DeviceEventEmitter } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { useIsFocused, useNavigation, NavigationProp } from '@react-navigation/native'
 import { Badge, Button, Surface, useTheme } from 'react-native-paper'
@@ -9,14 +9,38 @@ import { COLORS } from '../assets/theme'
 import MaterialDesignIcons from '@react-native-vector-icons/material-design-icons'
 import { useAppSelector } from '../redux/store'
 import AsyncStorage from '@react-native-async-storage/async-storage'
-import BleManager from 'react-native-ble-manager';
 import { useDispatch } from 'react-redux'
+
+import BleManager, {
+  BleDisconnectPeripheralEvent,
+  BleManagerDidUpdateValueForCharacteristicEvent,
+  BleScanCallbackType,
+  BleScanMatchMode,
+  BleScanMode,
+  Peripheral,
+  PeripheralInfo,
+} from 'react-native-ble-manager';
+import { loading, notLoading } from '../redux/actions/loadingAction'
+import { Buffer } from 'buffer';
+import { useBatteryLevel } from '../ble/BatteryLevel'
+
 
 type RootStackParamList = {
   LiveControl: undefined;
   PairDeviceOnBoard: undefined;
   // add other routes here if needed
 };
+
+declare module 'react-native-ble-manager' {
+  // enrich local contract with custom state properties needed by App.tsx
+  interface Peripheral {
+    connected?: boolean;
+    connecting?: boolean;
+  }
+}
+
+const BleManagerModule = NativeModules.BleManager;
+const bleManagerEmitter = new NativeEventEmitter(BleManagerModule);
 
 const HomeScreen = () => {
   const isFocused = useIsFocused()
@@ -25,6 +49,8 @@ const HomeScreen = () => {
   const device = useAppSelector((state) => state.deviceConnectionReducer?.device)
   const [deviceLocalState, setDeviceLocalState] = useState(device)
   const dispacth = useDispatch()
+  const batteryLevel = useBatteryLevel(device.id ?? '');
+  console.log(batteryLevel)
 
   useEffect(() => {
     StatusBar.setTranslucent(true);
@@ -35,10 +61,38 @@ const HomeScreen = () => {
     }
   }, [isFocused])
 
-  const setConnectedDeviceToLocalStorage = () => {
+  const setConnectedDeviceToLocalStorage = async () => {
     if (device) {
-      AsyncStorage.setItem('deviceConnect', JSON.stringify(device))
-      console.log(Object.keys(deviceLocalState).length)
+      await AsyncStorage.setItem('deviceConnect', JSON.stringify(device))
+      getBatteryStatus(device)
+    }
+  }
+
+  const getBatteryStatus = async (peripheral: Peripheral) => {
+    if (peripheral && peripheral.connected) {
+      console.log(await BleManager.retrieveServices(peripheral.id))
+      const { services, characteristics } = await BleManager.retrieveServices(peripheral.id);
+
+      if (
+        Array.isArray(services) && services.length > 0 &&
+        Array.isArray(characteristics) && characteristics.length > 0
+      ) {
+        const data = await BleManager.read(peripheral.id, '180F', '2A19');
+        console.log(data)
+        const batteryLevel = Buffer.from(data).readUInt8(0);
+      } else {
+        console.warn('No services or characteristics found for peripheral:', peripheral.id);
+      }
+    }
+  }
+
+  const checkIfDeviceStore = async () => {
+    let deviceStr = await AsyncStorage.getItem('deviceConnect')
+    if (deviceStr) {
+      const parsedDevice: Peripheral = JSON.parse(deviceStr)
+      if (parsedDevice != null) {
+        // connectPeripheral(parsedDevice)
+      }
     }
   }
 
@@ -50,6 +104,69 @@ const HomeScreen = () => {
       payload: {}
     })
   }
+
+  // const connectPeripheral = async (peripheral: Peripheral) => {
+  //   dispacth(loading())
+  //   try {
+  //     if (peripheral) {
+
+  //       await BleManager.connect(peripheral.id);
+  //       console.log(`[connectPeripheral][${peripheral.id}] connected.`);
+  //       // before retrieving services, it is often a good idea to let bonding & connection finish properly
+
+  //       /* Test read current RSSI value, retrieve services first */
+  //       const peripheralData = await BleManager.retrieveServices(peripheral.id);
+  //       console.log(
+  //         `[connectPeripheral][${peripheral.id}] retrieved peripheral services`,
+  //         peripheralData
+  //       );
+
+  //       const rssi = await BleManager.readRSSI(peripheral.id);
+  //       console.log(
+  //         `[connectPeripheral][${peripheral.id}] retrieved current RSSI value: ${rssi}.`
+  //       );
+
+  //       if (peripheralData.characteristics) {
+  //         for (const characteristic of peripheralData.characteristics) {
+  //           if (characteristic.descriptors) {
+  //             for (const descriptor of characteristic.descriptors) {
+  //               try {
+  //                 let data = await BleManager.readDescriptor(
+  //                   peripheral.id,
+  //                   characteristic.service,
+  //                   characteristic.characteristic,
+  //                   descriptor.uuid
+  //                 );
+  //                 console.log(
+  //                   `[connectPeripheral][${peripheral.id}] ${characteristic.service} ${characteristic.characteristic} ${descriptor.uuid} descriptor read as:`,
+  //                   data
+  //                 );
+  //               } catch (error) {
+  //                 console.error(
+  //                   `[connectPeripheral][${peripheral.id}] failed to retrieve descriptor ${descriptor} for characteristic ${characteristic}:`,
+  //                   error
+  //                 );
+  //               }
+  //             }
+  //           }
+  //         }
+  //       }
+
+  //       dispacth(notLoading())
+  //       dispacth({
+  //         type: 'CONNECT_DEVICE',
+  //         payload: peripheral
+  //       })
+  //       await AsyncStorage.setItem('deviceConnect', JSON.stringify(peripheral))
+  //     }
+  //   } catch (error) {
+  //     dispacth(notLoading())
+  //     console.error(
+  //       `[connectPeripheral][${peripheral.id}] connectPeripheral error`,
+  //       error
+  //     );
+  //   }
+  // };
 
   return (
     <ScreenLayout scrollable={true} style={{

@@ -33,6 +33,12 @@ import { Button, Surface, Text } from 'react-native-paper';
 import LottieView from 'lottie-react-native';
 import { useDispatch } from 'react-redux';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useAppDispatch, useAppSelector } from '../redux/store';
+import loadingReducer from '../redux/reducers/loadingReducer';
+import { loading, notLoading } from '../redux/actions/loadingAction';
+import { LoadingIndicator } from '../components/common/LoadingIndicator';
+import LoadingScreen from '../components/common/LoadingScreen';
+import { connectToBluetoothClassic } from '../ble/BLEManager';
 
 const SECONDS_TO_SCAN_FOR = 3;
 const SERVICE_UUIDS: string[] = [];
@@ -57,6 +63,7 @@ const ScanDevicesScreen = () => {
     new Map<Peripheral['id'], Peripheral>()
   );
   const dispacth = useDispatch()
+  const isLoading = useAppSelector(state => state.loading.loading)
 
   const startScan = () => {
     if (!isScanning) {
@@ -151,6 +158,7 @@ const ScanDevicesScreen = () => {
   };
 
   const connectPeripheral = async (peripheral: Peripheral) => {
+    dispacth(loading())
     try {
       if (peripheral) {
         setPeripherals((map) => {
@@ -163,6 +171,7 @@ const ScanDevicesScreen = () => {
         });
 
         await BleManager.connect(peripheral.id);
+        await connectToBluetoothClassic(peripheral.id);
         console.log(`[connectPeripheral][${peripheral.id}] connected.`);
 
         setPeripherals((map) => {
@@ -233,15 +242,17 @@ const ScanDevicesScreen = () => {
           return map;
         });
 
+        dispacth(notLoading())
         dispacth({
           type: 'CONNECT_DEVICE',
           payload: peripheral
         })
-        AsyncStorage.setItem('deviceConnect', JSON.stringify(peripheral))
+        await AsyncStorage.setItem('deviceConnect', JSON.stringify(peripheral))
 
         navigation.navigate('Main')
       }
     } catch (error) {
+      dispacth(notLoading())
       console.error(
         `[connectPeripheral][${peripheral.id}] connectPeripheral error`,
         error
@@ -430,6 +441,7 @@ const ScanDevicesScreen = () => {
           />
         )
         }
+      {isLoading ? <LoadingScreen /> : <></>}
       </ScreenLayout>
     </>
   );

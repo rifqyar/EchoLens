@@ -6,6 +6,7 @@ import { BottomNavigation, Text, useTheme } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import HomeScreen from '../../screens/HomeScreen';
 import { createStackNavigator } from '@react-navigation/stack';
+import GalleryScreen from '../../screens/GalleryScreen';
 
 // Menu tab
 const menus: {
@@ -54,14 +55,14 @@ const HomeScreenStack = () => {
   )
 }
 const AIRoute = () => <View style={styles.scene}><Text>AI Screen</Text></View>;
-const GalleryRoute = () => <View style={styles.scene}><Text>Gallery Screen</Text></View>;
+// const GalleryRoute = () => <View style={styles.scene}><Text>Gallery Screen</Text></View>;
 const ProfileRoute = () => <View style={styles.scene}><Text>Profile Screen</Text></View>;
 
 // Mapping key → komponen
 const scenes: Record<string, React.ComponentType<any>> = {
   home: HomeScreenStack,
   ai: AIRoute,
-  gallery: GalleryRoute,
+  gallery: GalleryScreen,
   profile: ProfileRoute,
 };
 

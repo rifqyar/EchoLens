@@ -1,4 +1,4 @@
-package com.echolens.app
+package com.optilens.app
 
 import android.app.Application
 import com.facebook.react.PackageList
@@ -9,6 +9,8 @@ import com.facebook.react.ReactNativeHost
 import com.facebook.react.ReactPackage
 import com.facebook.react.defaults.DefaultReactHost.getDefaultReactHost
 import com.facebook.react.defaults.DefaultReactNativeHost
+import com.optilens.app.wifip2p.WifiP2pPackage
+import com.optilens.app.BluetoothScoPackage
 
 class MainApplication : Application(), ReactApplication {
 
@@ -19,6 +21,9 @@ class MainApplication : Application(), ReactApplication {
               // Packages that cannot be autolinked yet can be added manually here, for example:
               // add(MyReactNativePackage())
               add(DeviceInfoPackage())
+              add(CameraIntentPackage())
+              add(WifiP2pPackage())
+              add(BluetoothScoPackage())
             }
 
         override fun getJSMainModuleName(): String = "index"

@@ -1,13 +1,13 @@
-package com.echolens.app
+package com.optilens.app
 
 import com.facebook.react.ReactPackage
 import com.facebook.react.bridge.NativeModule
 import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.uimanager.ViewManager
 
-class DeviceInfoPackage : ReactPackage {
+class BluetoothScoPackage : ReactPackage {
     override fun createNativeModules(reactContext: ReactApplicationContext): List<NativeModule> {
-        return listOf(DeviceInfoModule(reactContext))
+        return listOf(BluetoothScoModule(reactContext))
     }
 
     override fun createViewManagers(reactContext: ReactApplicationContext): List<ViewManager<*, *>> {

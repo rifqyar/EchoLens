@@ -1,5 +1,5 @@
-import { Alert, Platform, ScrollView, StatusBar, StyleSheet, TouchableOpacity, View } from 'react-native'
-import React, { useEffect, useState } from 'react'
+import { Alert, Linking, NativeEventEmitter, NativeModules, PermissionsAndroid, Platform, ScrollView, StatusBar, StyleSheet, TouchableOpacity, View } from 'react-native'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { useIsFocused } from '@react-navigation/native'
 import { Button, Surface, Switch, Text, Title, useTheme } from 'react-native-paper'
 import { AppHeader } from '../components/layout/AppHeader'
@@ -12,6 +12,14 @@ import { useDispatch } from 'react-redux'
 import { setAutoTranslationDisabled, setAutoTranslationEnabled, setVoiceToTextDisabled, setVoiceToTextEnabled } from '../redux/actions/smartFeatureAction'
 import RNFS from 'react-native-fs';
 import axios from 'axios'
+import BleManager from 'react-native-ble-manager';
+import { useSmartGlassesTrigger } from '../ble/TriggerEvents'
+import BluetoothSco from '../ble/BluetoothSco'
+import AudioRecorderPlayer from 'react-native-audio-recorder-player';
+import RNFetchBlob from 'rn-fetch-blob';
+import { Buffer } from 'buffer'
+
+const audioRecorderPlayer = AudioRecorderPlayer;
 
 const LiveControlScreen = () => {
   const isFocused = useIsFocused()
@@ -19,6 +27,13 @@ const LiveControlScreen = () => {
   const dispatch = useDispatch()
   const voiceToTextEnabled = useAppSelector(state => state.smartFeatureReducer.voiceToTextFeature);
   const autoTranslationEnabled = useAppSelector(state => state.smartFeatureReducer.autoTranslateFeature);
+  const [ready, setReady] = useState(false);
+  const [recording, setRecording] = useState(false);
+  const [recordingVideo, setRecodingVideo] = useState(false);
+  const [recordingAudio, setRecodingAudio] = useState(false);
+  const device = useAppSelector((state) => state.deviceConnectionReducer?.device)
+  const { triggerCapture, triggerStartVideo, triggerStopVideo, triggerStartAudio, triggerStopAudio } = useSmartGlassesTrigger(device.id);
+
 
   type Transcription = {
     original: string;
@@ -32,7 +47,18 @@ const LiveControlScreen = () => {
     StatusBar.setTranslucent(true);
     StatusBar.setBackgroundColor(theme.colors.secondary);
     StatusBar.setBarStyle('light-content');
+
+    BleManager.start({ showAlert: false })
   }, [isFocused])
+
+  const [state, setState] = React.useState('Idle');
+  useEffect(() => {
+    const sub = BluetoothSco.addListener((s) => {
+      console.log('SCO State:', s);
+      setState(s);
+    });
+    return () => sub.remove();
+  }, []);
 
   const handleVoiceToTextToggle = () => {
     if (!voiceToTextEnabled) {
@@ -98,6 +124,84 @@ const LiveControlScreen = () => {
     }
   };
 
+  async function requestStoragePermission() {
+    if (Platform.OS === 'android') {
+      const granted = await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
+        {
+          title: 'Storage Permission',
+          message: 'App needs access to your storage to save recordings',
+          buttonNeutral: 'Ask Me Later',
+          buttonNegative: 'Cancel',
+          buttonPositive: 'OK',
+        }
+      );
+      if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+        console.log('Permission granted');
+        return true;
+      } else if (granted === PermissionsAndroid.RESULTS.NEVER_ASK_AGAIN) {
+        console.log('User set Never Ask Again');
+        return 'never';
+      } else {
+        console.log('Permission denied');
+        return false;
+      }
+    }
+    return true;
+  }
+
+  const startRecording = async () => {
+    try {
+      const hasPermission = await requestStoragePermission();
+      if (hasPermission) {
+        BluetoothSco.startSco(); // aktifkan mic Bluetooth
+
+        const dirs = RNFetchBlob.fs.dirs;
+        const path = `${dirs.DownloadDir}/recording_${Date.now()}.mp4`;
+        const uri = await audioRecorderPlayer.startRecorder(path);
+        console.log('Recording at:', uri);
+        setRecording(true);
+      }
+    } catch (error) {
+      console.error('Error starting recording:', error);
+    }
+  };
+
+  const stopRecording = async () => {
+    try {
+      const result = await audioRecorderPlayer.stopRecorder();
+      console.log('Stopped at:', result);
+      BluetoothSco.stopSco(); // matikan SCO
+      setRecording(false);
+    } catch (error) {
+      console.error('Error stopping recording:', error);
+    }
+  };
+
+  const recordVideo = async () => {
+    if (!recordingVideo) {
+      setRecodingVideo(!recordingVideo)
+      triggerStartVideo()
+    }
+
+    if (recordingVideo) {
+      setRecodingVideo(!recordingVideo)
+      triggerStopVideo()
+    }
+  }
+
+  const recordAudio = async () => {
+    if (!recordingAudio) {
+      setRecodingAudio(!recordingAudio)
+      triggerStartAudio()
+    }
+
+    if (recordingAudio) {
+      setRecodingAudio(!recordingAudio)
+      triggerStopAudio()
+    }
+  }
+
   return (
     <>
       <AppHeader
@@ -150,9 +254,7 @@ const LiveControlScreen = () => {
                   justifyContent: 'center',
                   alignItems: 'center',
                 }}
-                onPress={() => {
-                  // Handle trigger action
-                }}
+                onPress={triggerCapture}
               >
                 <MaterialDesignIcons name='camera' size={30} color={COLORS.white} />
               </TouchableOpacity>
@@ -176,7 +278,7 @@ const LiveControlScreen = () => {
                   alignItems: 'center',
                 }}
                 onPress={() => {
-                  // Handle trigger action
+                  recordVideo()
                 }}
               >
                 <MaterialDesignIcons name='video' size={30} color={COLORS.white} />
@@ -185,7 +287,7 @@ const LiveControlScreen = () => {
                 textAlign: 'center',
                 marginTop: 15,
                 color: theme.colors.surface
-              }}>Record Video</Text>
+              }}>{recordingVideo ? 'Stop Recording' : 'Record Video'}</Text>
             </View>
             <View style={{
               flexDirection: 'column',
@@ -201,7 +303,7 @@ const LiveControlScreen = () => {
                   alignItems: 'center',
                 }}
                 onPress={() => {
-                  // Handle trigger action
+                  recordAudio()
                 }}
               >
                 <MaterialDesignIcons name='microphone-outline' size={30} color={COLORS.white} />
@@ -210,7 +312,7 @@ const LiveControlScreen = () => {
                 textAlign: 'center',
                 marginTop: 15,
                 color: theme.colors.surface
-              }}>Record Audio</Text>
+              }}>{recordingAudio ? 'Stop Recording' : 'Record Audio'}</Text>
             </View>
           </View>
         </SectionLayout>
@@ -294,8 +396,16 @@ const LiveControlScreen = () => {
                   marginHorizontal: 20,
                   backgroundColor: COLORS.primary,
                 }}
-                onPress={() => sendAudioToAPI()}>
-                Start Listening
+                onPress={() => {
+                  if (!recording) {
+                    setRecording(!recording)
+                    startRecording()
+                  } else {
+                    setRecording(!recording)
+                    stopRecording()
+                  }
+                }}>
+                {recording ? 'Stop Listening' : 'Start Listening'}
               </Button>
             </SectionLayout>
           )
