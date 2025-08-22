@@ -4,7 +4,7 @@ import {
 } from '@react-navigation/native'
 import { createStackNavigator } from '@react-navigation/stack'
 import { memo, useEffect, useRef } from 'react'
-import { Alert, BackHandler } from 'react-native'
+import { Alert, BackHandler, Image, View } from 'react-native'
 import LoginScreen from '../screens/LoginScreen'
 import { TabNavigator } from './TabNavigator'
 import StackBottomTabBar from '../components/layout/StackBottomTabBar'
@@ -12,6 +12,9 @@ import LiveControlScreen from '../screens/LiveControlScreen'
 import PairDeviceScreenOnBoard from '../screens/PairDeviceScreenOnBoard'
 import PairDeviceScreen from '../screens/PairDeviceScreen'
 import ScanDevicesScreen from '../screens/ScanDeviceScreen'
+import React from 'react'
+import HomeScreen from '../screens/HomeScreen'
+import { COLORS } from '../assets/theme'
 
 type MainStackParamList = {
   Login: undefined
@@ -79,6 +82,23 @@ const AppNavigator = memo(
       headerShadowVisible: false,
     }
 
+    const MemoizedHomeHeader = () => {
+      return (
+        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: "space-between", width: '100%' }}>
+          <View>
+            <Image
+              source={require('../assets/img/logo-full.png')}
+              style={{
+                width: 130,
+                resizeMode: 'contain',
+                marginLeft: 0,
+              }}
+            />
+          </View>
+        </View>
+      )
+    }
+
     return (
       <NavigationContainer
         ref={navigationRef}
@@ -102,6 +122,16 @@ const AppNavigator = memo(
           />
           <MainStack.Screen
             name={'Main'}
+            // component={HomeScreen}
+            // options={{
+            //   headerTitleAlign: 'left',
+            //   headerTitle: () => <MemoizedHomeHeader />,
+            //   headerStyle: {
+            //     backgroundColor: COLORS.background, // warna header
+            //   },
+            //   title: 'Home',
+            //   headerShown: true
+            // }}
             children={() => (
               <StackBottomTabBar initRouteName={0} />
             )}

@@ -14,9 +14,10 @@ function App(): React.JSX.Element {
     roundness: 2,
     colors: {
       ...MD3LightTheme.colors,
-      primary: '#f7503e',
-      secondary: '#230634',
-      tertiary: '#4602f8',
+      primary: '#EF5350',
+      secondary: '#3087d8',
+      tertiary: '#2b384b',
+      background: '#10182b'
     },
   };
 

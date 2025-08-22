@@ -19,7 +19,7 @@ const PairDeviceScreenOnBoard = () => {
 
   return (
     <>
-      <AppHeader withBack />
+      <AppHeader withBack title='Prepare for Pairing' />
       <ScreenLayout withBackgroundImg style={{
         paddingTop: 0,
         paddingBottom: 0,

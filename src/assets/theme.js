@@ -1,39 +1,31 @@
-import {
-  Dimensions,
-  Platform,
-  PixelRatio,
-  Appearance,
-} from 'react-native'
-const { width, height } = Dimensions.get('window')
+import { Dimensions, Platform, PixelRatio, Appearance } from 'react-native';
+const { width, height } = Dimensions.get('window');
 
-export const Normalize = (size) => {
-  const scale = width / 320
-  const newSize = size * scale
+export const Normalize = size => {
+  const scale = width / 320;
+  const newSize = size * scale;
 
   if (Platform.OS === 'ios') {
-    return Math.round(
-      PixelRatio.roundToNearestPixel(newSize)
-    )
+    return Math.round(PixelRatio.roundToNearestPixel(newSize));
   } else {
-    return (
-      Math.round(PixelRatio.roundToNearestPixel(newSize)) -
-      2
-    )
+    return Math.round(PixelRatio.roundToNearestPixel(newSize)) - 2;
   }
-}
+};
 
-export const Resize = (size) => {
-  const newSize = width / size
+export const Resize = size => {
+  const newSize = width / size;
 
-  return Math.round(newSize)
-}
+  return Math.round(newSize);
+};
 
-const colorScheme = Appearance.getColorScheme()
+const colorScheme = Appearance.getColorScheme();
 export const COLORS = {
   // base colors
-  primary: '#f7503e', // green
-  secondary: '#230634', // dark green
-  tertiary: '#4602f8',
+  primary: '#EF5350',
+  secondary: '#3087d8',
+  tertiary: '#2b384b',
+  background: '#10182b',
+
   white: '#FFFFFF',
   black: '#000000',
   blackLighten: '#181818',
@@ -102,6 +94,7 @@ export const COLORS = {
   accentOrange: '#FF6D00',
 
   Grey: '#9E9E9E',
+  accentGrey: '#c8c8c8ff',
   lightGrey: '#EAEAEA',
   darkGrey: '#212121',
 
@@ -111,7 +104,7 @@ export const COLORS = {
   transparent: 'transparent',
   light: colorScheme == 'light' ? '#212121' : '#EAEAEA',
   dark: colorScheme == 'light' ? '#EAEAEA' : '#212121',
-}
+};
 
 export const EVACOLOR = {
   colors: {
@@ -258,7 +251,7 @@ export const EVACOLOR = {
       1: '#222B45',
     },
   },
-}
+};
 
 export const SIZES = {
   // global sizes
@@ -295,7 +288,7 @@ export const SIZES = {
   // app dimensions
   width,
   height,
-}
+};
 
 export const FONTS = {
   largeTitle: {
@@ -368,8 +361,8 @@ export const FONTS = {
     fontSize: SIZES.body6,
     lineHeight: Normalize(22),
   },
-}
+};
 
-const appTheme = { COLORS, SIZES, FONTS }
+const appTheme = { COLORS, SIZES, FONTS };
 
-export default appTheme
+export default appTheme;

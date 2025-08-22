@@ -7,6 +7,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import HomeScreen from '../../screens/HomeScreen';
 import { createStackNavigator } from '@react-navigation/stack';
 import GalleryScreen from '../../screens/GalleryScreen';
+import { COLORS } from '../../assets/theme';
+import HistoryScreen from '../../screens/HistoryScreen';
 
 // Menu tab
 const menus: {
@@ -17,14 +19,14 @@ const menus: {
 }[] = [
     { key: 'home', title: 'Home', icon: 'home', routeName: 'HomeScreen' },
     // { key: 'ai', title: 'AI', icon: 'robot-excited', routeName: 'AIScreen' }, // replaced 'list-alt'
-    { key: 'gallery', title: 'Gallery', icon: 'image', routeName: 'GalleryScreen' },
+    { key: 'gallery', title: 'Gallery', icon: 'image', routeName: 'HistoryScreen' },
     { key: 'profile', title: 'Profile', icon: 'account', routeName: 'ProfileScreen' },
   ];
 
 const Stack = createStackNavigator();
 const HomeScreenStack = () => {
   const theme = useTheme();
-  const MemoizedHomeHeader = memo(() => {
+  const MemoizedHomeHeader = () => {
     return (
       <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: "space-between", width: '100%' }}>
         <View>
@@ -39,7 +41,7 @@ const HomeScreenStack = () => {
         </View>
       </View>
     )
-  })
+  }
 
   return (
     <Stack.Navigator>
@@ -47,7 +49,7 @@ const HomeScreenStack = () => {
         headerTitleAlign: 'left',
         headerTitle: () => <MemoizedHomeHeader />,
         headerStyle: {
-          backgroundColor: theme.colors.secondary, // warna header
+          backgroundColor: theme.colors.background, // warna header
         },
         title: 'Home',
       }} />
@@ -62,7 +64,7 @@ const ProfileRoute = () => <View style={styles.scene}><Text>Profile Screen</Text
 const scenes: Record<string, React.ComponentType<any>> = {
   home: HomeScreenStack,
   ai: AIRoute,
-  gallery: GalleryScreen,
+  gallery: HistoryScreen,
   profile: ProfileRoute,
 };
 
@@ -71,15 +73,6 @@ export default function StackBottomTabBar({ initRouteName }: any) {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
   const [index, setIndex] = useState(initRouteName);
-  // const [routes] = useState(
-  //   menus.map(menu => ({
-  //     key: menu.key,
-  //     title: menu.title,
-  //     icon: ({ color, size }: { color: string; size: number }) => (
-  //       <MaterialDesignIcons name={menu.icon} size={size} color={color} />
-  //     ),
-  //   }))
-  // );
   const [routes] = useState(
     menus.map(menu => ({
       key: menu.key,
@@ -108,7 +101,7 @@ export default function StackBottomTabBar({ initRouteName }: any) {
       activeColor="#fff"      // warna teks/icon aktif
       inactiveColor="#fff"    // warna teks/icon tidak aktif
       activeIndicatorStyle={{
-        backgroundColor: theme.colors.primary, // warna garis bawah aktif
+        backgroundColor: theme.colors.secondary, // warna garis bawah aktif
         padding: 30,
         marginTop: 25
       }}
@@ -117,7 +110,7 @@ export default function StackBottomTabBar({ initRouteName }: any) {
         // borderTopRightRadius: 35,
         overflow: 'hidden',
         paddingBottom: insets.bottom > 0 ? insets.bottom - 25 : 0,
-        backgroundColor: theme.colors.secondary,
+        backgroundColor: theme.colors.background,
       }}
     />
   );

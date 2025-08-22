@@ -19,7 +19,7 @@ export const AppHeader = (props: AppHeaderProps) => {
       style={[
         {
           // paddingTop: (StatusBar.currentHeight ?? 0), // Sesuaikan untuk Android
-          backgroundColor: theme.colors.secondary,
+          backgroundColor: theme.colors.background,
         },
         props.style]}
     >

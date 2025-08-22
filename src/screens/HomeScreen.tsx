@@ -1,24 +1,17 @@
-import { Image, StatusBar, StyleSheet, Text, View, NativeEventEmitter, NativeModules, DeviceEventEmitter } from 'react-native'
+import { Image, StatusBar, StyleSheet, Text, View, NativeEventEmitter, NativeModules, DeviceEventEmitter, TouchableOpacity } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { useIsFocused, useNavigation, NavigationProp } from '@react-navigation/native'
-import { Badge, Button, Surface, useTheme } from 'react-native-paper'
+import { Button, Surface, useTheme } from 'react-native-paper'
 import { SectionLayout } from '../components/layout/SectionLayout'
 import { ScreenLayout } from '../components/layout/ScreenLayout'
-import { AppHeader } from '../components/layout/AppHeader'
-import { COLORS } from '../assets/theme'
+import { COLORS, FONTS, SIZES } from '../assets/theme'
 import MaterialDesignIcons from '@react-native-vector-icons/material-design-icons'
 import { useAppSelector } from '../redux/store'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { useDispatch } from 'react-redux'
-
+import LinearGradient from 'react-native-linear-gradient';
 import BleManager, {
-  BleDisconnectPeripheralEvent,
-  BleManagerDidUpdateValueForCharacteristicEvent,
-  BleScanCallbackType,
-  BleScanMatchMode,
-  BleScanMode,
   Peripheral,
-  PeripheralInfo,
 } from 'react-native-ble-manager';
 import { loading, notLoading } from '../redux/actions/loadingAction'
 import { Buffer } from 'buffer';
@@ -170,30 +163,21 @@ const HomeScreen = () => {
   // };
 
   return (
-    <ScreenLayout scrollable={true} style={{
-      backgroundColor: COLORS.blackLighten,
+    <ScreenLayout withBackgroundImg scrollable={true} style={{
       paddingTop: 0,
       paddingBottom: 0,
     }}>
       {/* Connection Status */}
       <SectionLayout>
-        <Surface style={{
-          marginTop: 20,
-          width: '90%',
-          alignSelf: 'center',
-          padding: 20,
-          backgroundColor: COLORS.lightGrey,
-          borderRadius: 10,
-          gap: 20
-        }}>
-          <Text style={{ fontSize: 18, fontWeight: 'bold', color: theme.colors.onSurface }}>
+        <Surface style={styles.statusContainer}>
+          <Text style={{ fontSize: 18, fontWeight: 'bold', color: theme.colors.surface }}>
             Smart Glasses Status
           </Text>
           {
             Object.keys(deviceLocalState).length > 0 ? (
-              <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                <Image source={require('../assets/img/logo-alt.png')} style={{ width: '70%', height: 100, resizeMode: 'contain' }} />
-                <Text style={{ fontSize: 18, fontWeight: 'bold', color: theme.colors.onSurface }}>
+              <View style={styles.glassesContainer}>
+                <Image source={require('../assets/img/logo-alt.png')} style={styles.glassesImage} />
+                <Text style={styles.glassesName}>
                   {device.name}
                 </Text>
                 <Text style={{ fontSize: 12, color: theme.colors.onSurface }}>
@@ -201,12 +185,14 @@ const HomeScreen = () => {
                 </Text>
               </View>
             ) : (
-              <Text style={{ color: COLORS.accentTeal }}>Device Not Connected</Text>
+              <Text style={{ color: COLORS.accentGrey }}>Device Not Connected</Text>
             )
           }
 
-          <Button
-            mode='contained'
+          <TouchableOpacity
+            style={[styles.PairingButton, {
+              marginTop: 20
+            }]}
             onPress={() => {
               if (Object.keys(deviceLocalState).length > 0) {
                 disconnectDevice()
@@ -214,12 +200,21 @@ const HomeScreen = () => {
                 navigation.navigate('PairDeviceOnBoard')
               }
             }}
-            style={{ width: '100%' }}
-            labelStyle={{ fontSize: 16, color: theme.colors.onPrimary }}
-            buttonColor={theme.colors.primary}
           >
-            {Object.keys(deviceLocalState).length > 0 ? 'Unpair Device' : 'Pair Device'}
-          </Button>
+            <LinearGradient
+              style={[styles.PairingButton, {
+                paddingHorizontal: 25,
+                paddingVertical: 12
+              }]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              colors={[COLORS.primary, COLORS.accentRed]}
+            >
+              <Text style={{ textAlign: 'center', fontSize: 14, fontWeight: 'bold', color: COLORS.white }}>
+                {Object.keys(deviceLocalState).length > 0 ? 'Unpair Device' : 'Pair Device'}
+              </Text>
+            </LinearGradient>
+          </TouchableOpacity>
         </Surface>
       </SectionLayout>
 
@@ -228,40 +223,46 @@ const HomeScreen = () => {
       {/* Main Menu */}
       <SectionLayout style={{ marginTop: 20, alignItems: 'center' }} edges={['left', 'right']} horizontalPadding={19}>
         <View style={{ flexDirection: 'row', width: '100%', gap: 20 }}>
-          <Button
-            mode="contained"
+          <TouchableOpacity
+            style={styles.actionButton}
             onPress={() => {
               navigation.navigate('LiveControl')
             }}
-            style={{
-              width: '20%', flex: 1, aspectRatio: 1.5,
-              justifyContent: 'center',
-            }}
-            buttonColor={COLORS.accentTeal}
-            labelStyle={{ fontSize: 14, color: theme.colors.onPrimary }}
           >
-            <View style={{ flexDirection: 'column', alignItems: 'center', gap: 10, width: '100%' }}>
-              <MaterialDesignIcons name='play-circle-outline' size={28} color={theme.colors.onPrimary} />
-              <Text style={{ marginLeft: 5, color: theme.colors.onPrimary, fontSize: 18 }}>Live Control</Text>
-            </View>
-          </Button>
-          <Button
-            mode="contained"
+            <LinearGradient
+              style={[styles.actionButton, {
+                justifyContent: 'center',
+                alignItems: 'center',
+                gap: 10,
+              }]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              colors={[COLORS.secondary, COLORS.darkBlue]}
+            >
+              <MaterialDesignIcons name='microphone-outline' size={32} color={theme.colors.onPrimary} />
+              <Text style={{ marginLeft: 5, color: theme.colors.onPrimary, fontSize: 18 }}>Voice-to-Text</Text>
+            </LinearGradient>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.actionButton}
             onPress={() => {
-              // Navigate to AI Screen
+              navigation.navigate('LiveControl')
             }}
-            style={{
-              width: '20%', flex: 1, aspectRatio: 1.5,
-              justifyContent: 'center',
-            }}
-            buttonColor={COLORS.accentTeal}
-            labelStyle={{ fontSize: 14, color: theme.colors.onPrimary }}
           >
-            <View style={{ flexDirection: 'column', alignItems: 'center', gap: 10, width: '100%' }}>
-              <MaterialDesignIcons name='image' size={28} color={theme.colors.onPrimary} />
-              <Text style={{ marginLeft: 5, color: theme.colors.onPrimary, fontSize: 18 }}>Gallery</Text>
-            </View>
-          </Button>
+            <LinearGradient
+              style={[styles.actionButton, {
+                justifyContent: 'center',
+                alignItems: 'center',
+                gap: 10,
+              }]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              colors={[COLORS.secondary, COLORS.darkBlue]}
+            >
+              <MaterialDesignIcons name='ear-hearing' size={28} color={theme.colors.onPrimary} />
+              <Text style={{ marginLeft: 5, color: theme.colors.onPrimary, fontSize: 18 }}>Live Translation</Text>
+            </LinearGradient>
+          </TouchableOpacity>
         </View>
       </SectionLayout>
 
@@ -272,8 +273,10 @@ const HomeScreen = () => {
           width: '90%',
           alignSelf: 'center',
           padding: 20,
-          backgroundColor: COLORS.accentBlackLighten,
+          backgroundColor: COLORS.tertiary,
           borderRadius: 10,
+          borderWidth: 0.55,
+          borderColor: COLORS.background,
           gap: 20
         }}>
           <Text style={{ fontSize: 18, fontWeight: 'bold', color: theme.colors.surface }}>
@@ -281,7 +284,7 @@ const HomeScreen = () => {
           </Text>
           <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-              <MaterialDesignIcons name='microphone-outline' size={24} color={COLORS.lightPurple} />
+              <MaterialDesignIcons name='microphone-outline' size={24} color={COLORS.secondary} />
               <Text style={{ color: theme.colors.surface }}>Voice-to-Text</Text>
             </View>
 
@@ -299,7 +302,7 @@ const HomeScreen = () => {
           </View>
           <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-              <MaterialDesignIcons name='translate' size={24} color={COLORS.lightPurple} />
+              <MaterialDesignIcons name='translate' size={24} color={COLORS.secondary} />
               <Text style={{ color: theme.colors.surface }}>Auto Translation</Text>
             </View>
 
@@ -315,44 +318,6 @@ const HomeScreen = () => {
               <Text style={{ color: COLORS.lightTeal, fontSize: 10 }}>Available</Text>
             </View>
           </View>
-
-          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-              <MaterialDesignIcons name='play-circle-outline' size={24} color={COLORS.lightPurple} />
-              <Text style={{ color: theme.colors.surface }}>Live Control</Text>
-            </View>
-
-            <View style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              borderColor: COLORS.lightGrey,
-              borderWidth: 1,
-              paddingHorizontal: 10,
-              paddingVertical: 5,
-              borderRadius: 10,
-            }}>
-              <Text style={{ color: COLORS.lightGrey, fontSize: 10 }}>Device Not Connected</Text>
-            </View>
-          </View>
-
-          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-              <MaterialDesignIcons name='play-circle-outline' size={24} color={COLORS.lightPurple} />
-              <Text style={{ color: theme.colors.surface }}>Stream Video</Text>
-            </View>
-
-            <View style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              borderColor: COLORS.lightGrey,
-              borderWidth: 1,
-              paddingHorizontal: 10,
-              paddingVertical: 5,
-              borderRadius: 10,
-            }}>
-              <Text style={{ color: COLORS.lightGrey, fontSize: 10 }}>Device Not Connected</Text>
-            </View>
-          </View>
         </Surface>
       </SectionLayout>
     </ScreenLayout>
@@ -362,5 +327,29 @@ const HomeScreen = () => {
 export default HomeScreen
 
 const styles = StyleSheet.create({
-
+  statusContainer: {
+    marginTop: 20,
+    width: '90%',
+    alignSelf: 'center',
+    padding: 20,
+    backgroundColor: COLORS.tertiary,
+    borderRadius: 10,
+    borderWidth: 0.55,
+    borderColor: COLORS.background,
+    gap: 10
+  },
+  glassesContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+  glassesImage: { width: '70%', height: 100, resizeMode: 'contain' },
+  glassesName: { fontSize: 18, fontWeight: 'bold', color: COLORS.white },
+  PairingButton: {
+    width: '100%',
+    borderRadius: 15,
+  },
+  actionButton: {
+    width: '100%',
+    flex: 1,
+    aspectRatio: 1.5,
+    borderRadius: 15,
+    justifyContent: 'center',
+  }
 })
