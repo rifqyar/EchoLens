@@ -51,7 +51,7 @@ const LiveControlScreen = () => {
 
   useEffect(() => {
     StatusBar.setTranslucent(true);
-    StatusBar.setBackgroundColor(theme.colors.secondary);
+    StatusBar.setBackgroundColor(theme.colors.background);
     StatusBar.setBarStyle('light-content');
 
     BleManager.start({ showAlert: false })
@@ -99,7 +99,7 @@ const LiveControlScreen = () => {
     if (!voiceToTextEnabled) {
       dispatch(setVoiceToTextEnabled());
 
-      ws.current = new WebSocket("ws://192.168.18.198:4053/ws/transcribe");
+      ws.current = new WebSocket("ws://172.20.10.2:4053/ws/transcribe");
 
       ws.current.onopen = () => {
         console.log("Connected to Python server ✅ (waiting to start recording)");
@@ -216,8 +216,8 @@ const LiveControlScreen = () => {
   const startRecording = async () => {
     if (ws.current && ws.current.readyState === WebSocket.OPEN) {
       const startSco = async () => {
-        // BluetoothSco.startSco(); // aktifkan mic Bluetooth
-        BluetoothSco.stopSco(); // aktifkan mic Bluetooth
+        BluetoothSco.startSco(); // aktifkan mic Bluetooth
+        // BluetoothSco.stopSco(); // aktifkan mic Bluetooth
       }
 
       setPartialOriginal('')

@@ -71,10 +71,9 @@ const HistoryScreen: React.FC = () => {
 
   return (
     <>
-      <AppHeader title="Transcribtion History"/>
       <ScreenLayout withBackgroundImg>
         <View style={{ flex: 1, padding: 20 }}>
-          <Button title="Scan WiFi" onPress={scanWifi} />
+          {/* <Button title="Scan WiFi" onPress={scanWifi} />
           <Button title="Scan Peer" onPress={scanPeers} />
 
           <FlatList
@@ -116,7 +115,7 @@ const HistoryScreen: React.FC = () => {
                 <Text style={{ color: COLORS.white }}>Freq: {item.frequency} MHz</Text>
               </View>
             )}
-          />
+          /> */}
         </View>
       </ScreenLayout>
     </>

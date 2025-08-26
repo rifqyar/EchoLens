@@ -123,16 +123,16 @@ const ScanDevicesScreen = () => {
 
     setPeripherals((map) => {
       console.info('Loop Data Peripheral', peripheral);
-      if (
-        peripheral.name?.includes('G300') ||
-        peripheral.name?.includes('FD8C') ||
-        peripheral.name?.includes('G300_FD8C')
-      ) {
+      // if (
+      //   peripheral.name?.includes('G300') ||
+      //   peripheral.name?.includes('FD8C') ||
+      //   peripheral.name?.includes('G300_FD8C')
+      // ) {
         const newMap = new Map(map);
         newMap.set(peripheral.id, peripheral);
         return newMap;
-      }
-      return map;
+      // }
+      // return map;
     });
   };
 

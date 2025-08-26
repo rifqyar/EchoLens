@@ -47,8 +47,8 @@ const LoginScreen = ({ navigation }: LoginScreenProps) => {
 
   useEffect(() => {
     StatusBar.setTranslucent(true);
-    StatusBar.setBackgroundColor(theme.colors.secondary);
-    StatusBar.setBarStyle('dark-content');
+    StatusBar.setBackgroundColor('transparent');
+    StatusBar.setBarStyle('light-content');
   }, [isFocused])
 
   useEffect(() => {

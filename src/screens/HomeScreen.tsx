@@ -21,7 +21,7 @@ import RNBluetoothClassic from 'react-native-bluetooth-classic';
 type RootStackParamList = {
   LiveControl: undefined;
   PairDeviceOnBoard: undefined;
-  // add other routes here if needed
+  VoiceToTextScreen: undefined;
 };
 
 declare module 'react-native-ble-manager' {
@@ -47,7 +47,7 @@ const HomeScreen = () => {
 
   useEffect(() => {
     StatusBar.setTranslucent(true);
-    StatusBar.setBackgroundColor(theme.colors.secondary);
+    StatusBar.setBackgroundColor(theme.colors.background);
     StatusBar.setBarStyle('light-content');
     if (isFocused) {
       setConnectedDeviceToLocalStorage()
@@ -90,9 +90,12 @@ const HomeScreen = () => {
   }
 
   const disconnectDevice = async () => {
+    if(device.isBLE){
+      await BleManager.disconnect(device.id);
+    }
+
+    await RNBluetoothClassic.disconnectFromDevice(device.id);
     setDeviceLocalState({})
-    await BleManager.disconnect(device.id);
-    await RNBluetoothClassic.connectToDevice(device.id);
     dispacth({
       type: 'DISCONNET_DEVICE',
       payload: {}
@@ -180,7 +183,7 @@ const HomeScreen = () => {
                 <Text style={styles.glassesName}>
                   {device.name}
                 </Text>
-                <Text style={{ fontSize: 12, color: theme.colors.onSurface }}>
+                <Text style={{ fontSize: 12, color: theme.colors.surface, marginTop: 10 }}>
                   Device Connected
                 </Text>
               </View>
@@ -191,7 +194,7 @@ const HomeScreen = () => {
 
           <TouchableOpacity
             style={[styles.PairingButton, {
-              marginTop: 20
+              marginTop: 10
             }]}
             onPress={() => {
               if (Object.keys(deviceLocalState).length > 0) {
@@ -226,7 +229,7 @@ const HomeScreen = () => {
           <TouchableOpacity
             style={styles.actionButton}
             onPress={() => {
-              navigation.navigate('LiveControl')
+              navigation.navigate('VoiceToTextScreen')
             }}
           >
             <LinearGradient

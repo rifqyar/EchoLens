@@ -15,6 +15,8 @@ import ScanDevicesScreen from '../screens/ScanDeviceScreen'
 import React from 'react'
 import HomeScreen from '../screens/HomeScreen'
 import { COLORS } from '../assets/theme'
+import VoiceToTextScreen from '../screens/VoiceToText'
+import BottomTabBar from '../components/layout/BottomTabBar'
 
 type MainStackParamList = {
   Login: undefined
@@ -23,6 +25,7 @@ type MainStackParamList = {
   PairDeviceOnBoard: undefined
   PairDeviceScreen: undefined
   ScanDeviceScreen: undefined
+  VoiceToTextScreen: undefined
 }
 
 const MainStack =
@@ -82,23 +85,6 @@ const AppNavigator = memo(
       headerShadowVisible: false,
     }
 
-    const MemoizedHomeHeader = () => {
-      return (
-        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: "space-between", width: '100%' }}>
-          <View>
-            <Image
-              source={require('../assets/img/logo-full.png')}
-              style={{
-                width: 130,
-                resizeMode: 'contain',
-                marginLeft: 0,
-              }}
-            />
-          </View>
-        </View>
-      )
-    }
-
     return (
       <NavigationContainer
         ref={navigationRef}
@@ -133,7 +119,7 @@ const AppNavigator = memo(
             //   headerShown: true
             // }}
             children={() => (
-              <StackBottomTabBar initRouteName={0} />
+              <BottomTabBar />
             )}
             options={{ headerShown: false }}
           />
@@ -152,6 +138,10 @@ const AppNavigator = memo(
           <MainStack.Screen
             name={'LiveControl'}
             component={LiveControlScreen}
+          />
+          <MainStack.Screen
+            name={'VoiceToTextScreen'}
+            component={VoiceToTextScreen}
           />
         </MainStack.Navigator>
       </NavigationContainer>

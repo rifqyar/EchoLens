@@ -6,14 +6,9 @@ import HomeScreen from '../../screens/HomeScreen'
 import HistoryScreen from '../../screens/HistoryScreen'
 import MaterialDesignIcons from '@react-native-vector-icons/material-design-icons'
 import { COLORS } from '../../assets/theme'
+import ProfileScreen from '../../screens/ProfileScreen'
 
 const Tab = createBottomTabNavigator()
-
-const ProfileScreen = () => (
-  <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-    <Text>Profile Screen</Text>
-  </View>
-)
 
 const CustomHeader = () => (
   <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: "space-between", width: '100%' }}>
@@ -71,6 +66,8 @@ export default function BottomTabBar() {
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
+        // headerShown:route.name != 'Home' ? false : true,
+        headerShown:true,
         headerTitle: () => <CustomHeader />,
         headerStyle: {
           backgroundColor: COLORS.background

@@ -19,7 +19,7 @@ const menus: {
 }[] = [
     { key: 'home', title: 'Home', icon: 'home', routeName: 'HomeScreen' },
     // { key: 'ai', title: 'AI', icon: 'robot-excited', routeName: 'AIScreen' }, // replaced 'list-alt'
-    { key: 'gallery', title: 'Gallery', icon: 'image', routeName: 'HistoryScreen' },
+    { key: 'history', title: 'History', icon: 'image', routeName: 'HistoryScreen' },
     { key: 'profile', title: 'Profile', icon: 'account', routeName: 'ProfileScreen' },
   ];
 
@@ -56,15 +56,12 @@ const HomeScreenStack = () => {
     </Stack.Navigator>
   )
 }
-const AIRoute = () => <View style={styles.scene}><Text>AI Screen</Text></View>;
-// const GalleryRoute = () => <View style={styles.scene}><Text>Gallery Screen</Text></View>;
 const ProfileRoute = () => <View style={styles.scene}><Text>Profile Screen</Text></View>;
 
 // Mapping key → komponen
 const scenes: Record<string, React.ComponentType<any>> = {
   home: HomeScreenStack,
-  ai: AIRoute,
-  gallery: HistoryScreen,
+  history: HistoryScreen,
   profile: ProfileRoute,
 };
 

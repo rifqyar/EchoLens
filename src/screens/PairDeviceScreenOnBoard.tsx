@@ -50,7 +50,7 @@ const PairDeviceScreenOnBoard = () => {
           <Button
             mode='contained'
             onPress={() => {
-              navigation.navigate('ScanDeviceScreen')
+              navigation.navigate('PairDeviceScreen')
             }}
             style={{ width: '100%', marginBottom: 35 }}
             labelStyle={{ fontSize: 16, color: '#FFF' }}

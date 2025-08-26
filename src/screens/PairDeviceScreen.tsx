@@ -5,16 +5,24 @@ import { ScreenLayout } from '../components/layout/ScreenLayout'
 import LottieView from 'lottie-react-native';
 import { COLORS } from '../assets/theme';
 import { SectionLayout } from '../components/layout/SectionLayout';
-import { useIsFocused } from '@react-navigation/native';
+import { NavigationProp, useIsFocused, useNavigation } from '@react-navigation/native';
 import { connectToBluetoothClassic, scanBluetoothClassic } from '../ble/BLEManager';
 import { BluetoothDevice } from 'react-native-bluetooth-classic';
 import { Button, Surface, Text } from 'react-native-paper';
+import { useDispatch } from 'react-redux';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+type RootStackParamList = {
+  Main: undefined;
+};
 
 const PairDeviceScreen = () => {
   const isFocused = useIsFocused()
   const [scanning, setScanning] = useState(true)
   const [devices, setDevices] = useState<BluetoothDevice[]>([]);
   const [targetDevices, setTargetDevices] = useState<BluetoothDevice[]>([]);
+  const navigation = useNavigation<NavigationProp<RootStackParamList>>()
+  const dispatch = useDispatch()
 
   useEffect(() => {
     if (isFocused) {
@@ -30,14 +38,14 @@ const PairDeviceScreen = () => {
 
     // Cari device bernama G300_FD8C
     // Filter semua device yang nama persisnya G300_FD8C
-    const targets = result.filter((d) => d.name === 'G300_FD8C');
+    const targets = result.filter((d) => d.name === 'MO1');
 
     if (targets.length > 0) {
-      console.log(`🎯 Ditemukan ${targets.length} device bernama G300_FD8C`);
+      console.log(`🎯 Ditemukan ${targets.length} device bernama MO1`);
       setTargetDevices(targets); // simpan ke state khusus target device
       setScanning(false)
     } else {
-      console.log('⚠️ Tidak ada device G300_FD8C ditemukan.');
+      console.log('⚠️ Tidak ada device M01 ditemukan.');
       setScanning(false)
       setTargetDevices([]); // reset kalau tidak ada
     }
@@ -46,9 +54,8 @@ const PairDeviceScreen = () => {
   return (
     <>
       <AppHeader withBack title='Device' />
-      <ScreenLayout scrollable={true} style={{
+      <ScreenLayout withBackgroundImg scrollable={true} style={{
         paddingTop: 0,
-        backgroundColor: COLORS.blackLighten,
       }}>
         {
           scanning ? (
@@ -109,9 +116,22 @@ const PairDeviceScreen = () => {
                     <View>
                       <Button
                         mode='contained'
-                        onPress={() => {
-                          const connectStatus = connectToBluetoothClassic(device.address)
-                          console.log(connectStatus)
+                        onPress={async () => {
+                          await connectToBluetoothClassic(device.address)
+
+                          let devices = {
+                            name: device.name,
+                            id: device.id,
+                            connected: true,
+                            isBLE: false
+                          }
+
+                          dispatch({
+                            type: 'CONNECT_DEVICE',
+                            payload: devices
+                          })
+                          await AsyncStorage.setItem('deviceConnect', JSON.stringify(devices))
+                          navigation.navigate('Main')
                         }}
                       >
                         Pair Device
