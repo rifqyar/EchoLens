@@ -99,7 +99,7 @@ const LiveControlScreen = () => {
     if (!voiceToTextEnabled) {
       dispatch(setVoiceToTextEnabled());
 
-      ws.current = new WebSocket("ws://172.20.10.2:4053/ws/transcribe");
+      ws.current = new WebSocket("ws://182.253.172.27:30080/ws/transcribe");
 
       ws.current.onopen = () => {
         console.log("Connected to Python server ✅ (waiting to start recording)");
@@ -217,7 +217,6 @@ const LiveControlScreen = () => {
     if (ws.current && ws.current.readyState === WebSocket.OPEN) {
       const startSco = async () => {
         BluetoothSco.startSco(); // aktifkan mic Bluetooth
-        // BluetoothSco.stopSco(); // aktifkan mic Bluetooth
       }
 
       setPartialOriginal('')
