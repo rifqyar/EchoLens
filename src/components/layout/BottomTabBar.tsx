@@ -3,10 +3,10 @@ import React, { useEffect, useRef } from 'react'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import { View, Text, Image, TouchableOpacity, StyleSheet, Animated } from 'react-native'
 import HomeScreen from '../../screens/HomeScreen'
-import HistoryScreen from '../../screens/HistoryScreen'
 import MaterialDesignIcons from '@react-native-vector-icons/material-design-icons'
 import { COLORS } from '../../assets/theme'
 import ProfileScreen from '../../screens/ProfileScreen'
+import SupportDevices from '../../screens/SupportDevices'
 
 const Tab = createBottomTabNavigator()
 
@@ -77,8 +77,8 @@ export default function BottomTabBar() {
 
           if (route.name === 'Home') {
             iconName = 'home'
-          } else if (route.name === 'History') {
-            iconName = 'history'
+          } else if (route.name === 'Support') {
+            iconName = 'devices'
           } else if (route.name === 'Profile') {
             iconName = 'account'
           }
@@ -102,7 +102,7 @@ export default function BottomTabBar() {
       })}
     >
       <Tab.Screen name="Home" component={HomeScreen} />
-      <Tab.Screen name="History" component={HistoryScreen} />
+      <Tab.Screen name="Support" component={SupportDevices} />
       <Tab.Screen name="Profile" component={ProfileScreen} />
     </Tab.Navigator>
   )

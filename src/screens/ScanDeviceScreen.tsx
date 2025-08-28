@@ -15,6 +15,7 @@ import {
   TouchableHighlight,
   Pressable,
   Image,
+  TouchableOpacity,
 } from 'react-native';
 import BleManager, {
   BleDisconnectPeripheralEvent,
@@ -38,7 +39,8 @@ import loadingReducer from '../redux/reducers/loadingReducer';
 import { loading, notLoading } from '../redux/actions/loadingAction';
 import { LoadingIndicator } from '../components/common/LoadingIndicator';
 import LoadingScreen from '../components/common/LoadingScreen';
-import { connectToBluetoothClassic } from '../ble/BLEManager';
+import { connectToBluetoothClassic, scanBluetoothClassic } from '../ble/BLEManager';
+import { BluetoothDevice } from 'react-native-bluetooth-classic';
 
 const SECONDS_TO_SCAN_FOR = 3;
 const SERVICE_UUIDS: string[] = [];
@@ -49,6 +51,7 @@ declare module 'react-native-ble-manager' {
   interface Peripheral {
     connected?: boolean;
     connecting?: boolean;
+    isBLE?: boolean;
   }
 }
 type RootStackParamList = {
@@ -62,6 +65,7 @@ const ScanDevicesScreen = () => {
   const [peripherals, setPeripherals] = useState(
     new Map<Peripheral['id'], Peripheral>()
   );
+  const [targetDevices, setTargetDevices] = useState<BluetoothDevice[]>([]);
   const dispacth = useDispatch()
   const isLoading = useAppSelector(state => state.loading.loading)
 
@@ -123,16 +127,16 @@ const ScanDevicesScreen = () => {
 
     setPeripherals((map) => {
       console.info('Loop Data Peripheral', peripheral);
-      // if (
-      //   peripheral.name?.includes('G300') ||
-      //   peripheral.name?.includes('FD8C') ||
-      //   peripheral.name?.includes('G300_FD8C')
-      // ) {
+      if (
+        peripheral.name?.includes('G300') ||
+        peripheral.name?.includes('FD8C') ||
+        peripheral.name?.includes('G300_FD8C')
+      ) {
         const newMap = new Map(map);
         newMap.set(peripheral.id, peripheral);
         return newMap;
-      // }
-      // return map;
+      }
+      return map;
     });
   };
 
@@ -243,9 +247,12 @@ const ScanDevicesScreen = () => {
         });
 
         dispacth(notLoading())
+        let payloadState = peripheral
+        payloadState.isBLE = true
+        
         dispacth({
           type: 'CONNECT_DEVICE',
-          payload: peripheral
+          payload: payloadState
         })
         await AsyncStorage.setItem('deviceConnect', JSON.stringify(peripheral))
 
@@ -342,6 +349,22 @@ const ScanDevicesScreen = () => {
     }
   };
 
+  const startScanBluetootClassic = async () => {
+    setIsScanning(true)
+    const result = await scanBluetoothClassic()
+
+    const targets = result.filter((d) => d.name === 'MO1');
+    if (targets.length > 0) {
+      console.log(`🎯 Ditemukan ${targets.length} device bernama MO1`);
+      setTargetDevices(targets); // simpan ke state khusus target device
+      setIsScanning(false)
+    } else {
+      console.log('⚠️ Tidak ada device M01 ditemukan.');
+      setIsScanning(false)
+      setTargetDevices([]);
+    }
+  }
+
   const renderItem = ({ item }: { item: Peripheral }) => {
     return (
       <>
@@ -390,13 +413,61 @@ const ScanDevicesScreen = () => {
     );
   };
 
-  console.log()
+  const renderItemClassic = ({ item }: any) => {
+    return (
+      <>
+        <SectionLayout edges={['left', 'right']} horizontalPadding={30}>
+          <Surface
+            style={{
+              flex: 1,
+              justifyContent: 'center',
+              borderRadius: 35,
+              paddingTop: 40,
+              paddingHorizontal: 40,
+              paddingBottom: 25,
+              marginBottom: 20,
+            }}
+          >
+            <View style={{ alignItems: 'center', justifyContent: 'center', marginBottom: 20 }}>
+              <Image source={require('../assets/img/logo-alt.png')} style={{ width: '80%', height: 100, resizeMode: 'contain' }} />
+              <Text variant='titleMedium' style={{ marginTop: 10 }}>{item.name}</Text>
+              <Text>{item.address ?? 'testing mac address'}</Text>
+            </View>
+            <View>
+              <Button
+                mode='contained'
+                onPress={async () => {
+                  await connectToBluetoothClassic(item.address)
+
+                  let devices = {
+                    name: item.name,
+                    id: item.address,
+                    connected: true,
+                    isBLE: false
+                  }
+
+                  dispacth({
+                    type: 'CONNECT_DEVICE',
+                    payload: devices
+                  })
+                  await AsyncStorage.setItem('deviceConnect', JSON.stringify(devices))
+                  navigation.navigate('Main')
+                }}
+              >
+                Pair Device
+              </Button>
+            </View>
+          </Surface>
+        </SectionLayout>
+      </>
+
+    );
+  };
   return (
     <>
       <AppHeader withBack title='Device' />
-      <ScreenLayout style={{
+      <ScreenLayout withBackgroundImg style={{
         paddingTop: 0,
-        backgroundColor: COLORS.blackLighten,
       }}>
         {isScanning == true ? (
           <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }} >
@@ -415,7 +486,7 @@ const ScanDevicesScreen = () => {
               </Text>
             </SectionLayout>
           </View>
-        ) : Array.from(peripherals.values()).length == 0 ? (
+        ) : Array.from(peripherals.values()).length == 0 && targetDevices.length == 0 ? (
           <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
             {/* <Image
                 source={require('../assets/img/no-device.png')}
@@ -431,17 +502,38 @@ const ScanDevicesScreen = () => {
             <Button mode="contained" onPress={startScan}>
               Retry
             </Button>
+
+            {/* <TouchableOpacity style={{
+              alignItems: 'center',
+              justifyContent: 'center',
+              marginTop: 20
+            }}
+              onPress={startScanBluetootClassic}
+            >
+              <Text style={{ color: COLORS.primary }}>Or Retry it With Bluetooth Classic</Text>
+            </TouchableOpacity> */}
           </View>
-        ) : (
+        ) : Array.from(peripherals.values()).length > 0 ? (
           <FlatList
             data={Array.from(peripherals.values())}
             contentContainerStyle={{ rowGap: 12 }}
             renderItem={renderItem}
             keyExtractor={(item) => item.id}
           />
+        ) : targetDevices.length > 0 ? (
+          <>
+            <FlatList
+              data={targetDevices}
+              contentContainerStyle={{ rowGap: 12 }}
+              renderItem={renderItemClassic}
+              keyExtractor={(item) => item.id}
+            />
+          </>
+        ) : (
+          <></>
         )
         }
-      {isLoading ? <LoadingScreen /> : <></>}
+        {isLoading ? <LoadingScreen /> : <></>}
       </ScreenLayout>
     </>
   );

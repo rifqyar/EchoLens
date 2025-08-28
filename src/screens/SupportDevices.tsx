@@ -8,11 +8,15 @@ import {
   Platform,
   Alert,
   NativeModules,
+  Image,
+  StyleSheet,
 } from "react-native";
 import WifiManager from "react-native-wifi-reborn";
 import { AppHeader } from "../components/layout/AppHeader";
 import { ScreenLayout } from "../components/layout/ScreenLayout";
 import { COLORS } from "../assets/theme";
+import { SectionLayout } from "../components/layout/SectionLayout";
+import { Surface, useTheme } from "react-native-paper";
 const { WifiP2pModule } = NativeModules;
 
 interface WifiNetwork {
@@ -30,9 +34,10 @@ interface Device {
   status: number;
 }
 
-const HistoryScreen: React.FC = () => {
+const SupportDevices: React.FC = () => {
   const [wifiList, setWifiList] = useState<WifiNetwork[]>([]);
   const [devices, setDevices] = useState<Device[]>([]);
+  const theme = useTheme()
 
   const requestPermissions = async () => {
     if (Platform.OS === "android") {
@@ -73,6 +78,20 @@ const HistoryScreen: React.FC = () => {
     <>
       <ScreenLayout withBackgroundImg>
         <View style={{ flex: 1, padding: 20 }}>
+          {/* Connection Status */}
+          <SectionLayout>
+            <Text style={{ fontSize: 18, fontWeight: 'bold', color: theme.colors.surface }}>
+              Supported Devices
+            </Text>
+            <Surface style={styles.statusContainer}>
+              <View style={styles.glassesContainer}>
+                <Image source={require('../assets/img/logo-alt.png')} style={styles.glassesImage} />
+                <Text style={styles.glassesName}>
+                  MO1
+                </Text>
+              </View>
+            </Surface>
+          </SectionLayout>
           {/* <Button title="Scan WiFi" onPress={scanWifi} />
           <Button title="Scan Peer" onPress={scanPeers} />
 
@@ -122,4 +141,21 @@ const HistoryScreen: React.FC = () => {
   );
 };
 
-export default HistoryScreen;
+export default SupportDevices;
+
+const styles = StyleSheet.create({
+  statusContainer: {
+    marginTop: 20,
+    width: '100%',
+    alignSelf: 'center',
+    padding: 20,
+    backgroundColor: COLORS.tertiary,
+    borderRadius: 10,
+    borderWidth: 0.55,
+    borderColor: COLORS.background,
+    gap: 10
+  },
+  glassesContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+  glassesImage: { width: '70%', height: 100, resizeMode: 'contain' },
+  glassesName: { fontSize: 18, fontWeight: 'bold', color: COLORS.white },
+})

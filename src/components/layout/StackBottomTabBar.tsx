@@ -8,7 +8,7 @@ import HomeScreen from '../../screens/HomeScreen';
 import { createStackNavigator } from '@react-navigation/stack';
 import GalleryScreen from '../../screens/GalleryScreen';
 import { COLORS } from '../../assets/theme';
-import HistoryScreen from '../../screens/HistoryScreen';
+import HistoryScreen from '../../screens/SupportDevices';
 
 // Menu tab
 const menus: {

@@ -64,7 +64,7 @@ const SelectOptions: React.FC<SelectProps> = ({
           selectedValue={selectedValue}
           onValueChange={(itemValue) => onValueChange(itemValue)}
           style={styles.picker}
-          dropdownIconColor="#fff"
+          dropdownIconColor="#959595ff"
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
         >
@@ -73,7 +73,7 @@ const SelectOptions: React.FC<SelectProps> = ({
               key={opt.value}
               label={opt.label}
               value={opt.value}
-              color="#fff" // isi teks putih biar kontras
+              color="#0b0b0bff"
             />
           ))}
         </Picker>

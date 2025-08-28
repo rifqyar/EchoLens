@@ -17,11 +17,13 @@ import { loading, notLoading } from '../redux/actions/loadingAction'
 import { Buffer } from 'buffer';
 import { useBatteryLevel } from '../ble/BatteryLevel'
 import RNBluetoothClassic from 'react-native-bluetooth-classic';
+import { checkBondedClassicPeripheral } from '../ble/BLEManager'
 
 type RootStackParamList = {
   LiveControl: undefined;
   PairDeviceOnBoard: undefined;
   VoiceToTextScreen: undefined;
+  VoiceToTextRealtime: undefined;
 };
 
 declare module 'react-native-ble-manager' {
@@ -43,7 +45,6 @@ const HomeScreen = () => {
   const [deviceLocalState, setDeviceLocalState] = useState(device)
   const dispacth = useDispatch()
   const batteryLevel = useBatteryLevel(device.id ?? '');
-  console.log(batteryLevel)
 
   useEffect(() => {
     StatusBar.setTranslucent(true);
@@ -51,8 +52,26 @@ const HomeScreen = () => {
     StatusBar.setBarStyle('light-content');
     if (isFocused) {
       setConnectedDeviceToLocalStorage()
+      checkConnectedBLE()
     }
   }, [isFocused])
+
+  const checkConnectedBLE = async () => {
+    const devices = await checkBondedClassicPeripheral()
+
+    let device = {
+      name: devices[0].name,
+      id: devices[0].address,
+      connected: true,
+      isBLE: false
+    }
+
+    dispacth({
+      type: 'CONNECT_DEVICE',
+      payload: device
+    })
+    await AsyncStorage.setItem('deviceConnect', JSON.stringify(devices))
+  }
 
   const setConnectedDeviceToLocalStorage = async () => {
     if (device) {
@@ -90,16 +109,17 @@ const HomeScreen = () => {
   }
 
   const disconnectDevice = async () => {
-    if(device.isBLE){
+    if (!device.isBLE) {
+      await RNBluetoothClassic.disconnectFromDevice(device.id);
+      await RNBluetoothClassic.unpairDevice(device.id);
+      setDeviceLocalState({})
+      dispacth({
+        type: 'DISCONNET_DEVICE',
+        payload: {}
+      })
+    } else {
       await BleManager.disconnect(device.id);
     }
-
-    await RNBluetoothClassic.disconnectFromDevice(device.id);
-    setDeviceLocalState({})
-    dispacth({
-      type: 'DISCONNET_DEVICE',
-      payload: {}
-    })
   }
 
   // const connectPeripheral = async (peripheral: Peripheral) => {
@@ -165,6 +185,7 @@ const HomeScreen = () => {
   //   }
   // };
 
+  console.log((Object.keys(device).length))
   return (
     <ScreenLayout withBackgroundImg scrollable={true} style={{
       paddingTop: 0,
@@ -177,7 +198,7 @@ const HomeScreen = () => {
             Smart Glasses Status
           </Text>
           {
-            Object.keys(deviceLocalState).length > 0 ? (
+            Object.keys(device).length > 0 ? (
               <View style={styles.glassesContainer}>
                 <Image source={require('../assets/img/logo-alt.png')} style={styles.glassesImage} />
                 <Text style={styles.glassesName}>
@@ -197,7 +218,7 @@ const HomeScreen = () => {
               marginTop: 10
             }]}
             onPress={() => {
-              if (Object.keys(deviceLocalState).length > 0) {
+              if (Object.keys(device).length > 0) {
                 disconnectDevice()
               } else {
                 navigation.navigate('PairDeviceOnBoard')
@@ -214,7 +235,7 @@ const HomeScreen = () => {
               colors={[COLORS.primary, COLORS.accentRed]}
             >
               <Text style={{ textAlign: 'center', fontSize: 14, fontWeight: 'bold', color: COLORS.white }}>
-                {Object.keys(deviceLocalState).length > 0 ? 'Unpair Device' : 'Pair Device'}
+                {Object.keys(device).length > 0 ? 'Unpair Device' : 'Pair Device'}
               </Text>
             </LinearGradient>
           </TouchableOpacity>
@@ -249,7 +270,7 @@ const HomeScreen = () => {
           <TouchableOpacity
             style={styles.actionButton}
             onPress={() => {
-              navigation.navigate('LiveControl')
+              navigation.navigate('VoiceToTextRealtime')
             }}
           >
             <LinearGradient

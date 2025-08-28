@@ -143,3 +143,17 @@ export async function scanOnce(
   // const peripherals = await BleManager.getDiscoveredPeripherals([]);
   return Array.from(found.values());
 }
+
+export const checkBondedClassicPeripheral = async (): Promise<BluetoothDevice[]> => {
+  try {
+    const pairedDevices: BluetoothDevice[] = await RNBluetoothClassic.getBondedDevices();
+
+    const availDevice = pairedDevices.filter((d) => d.name === 'MO1');
+    await RNBluetoothClassic.connectToDevice(availDevice[0].address)
+    
+    return availDevice
+  } catch (error) {
+    console.error('Error checking connected Bluetooth Classic devices:', error);
+    return [];
+  }
+};

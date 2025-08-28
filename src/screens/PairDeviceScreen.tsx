@@ -7,7 +7,7 @@ import { COLORS } from '../assets/theme';
 import { SectionLayout } from '../components/layout/SectionLayout';
 import { NavigationProp, useIsFocused, useNavigation } from '@react-navigation/native';
 import { connectToBluetoothClassic, scanBluetoothClassic } from '../ble/BLEManager';
-import { BluetoothDevice } from 'react-native-bluetooth-classic';
+import RNBluetoothClassic, { BluetoothDevice } from 'react-native-bluetooth-classic';
 import { Button, Surface, Text } from 'react-native-paper';
 import { useDispatch } from 'react-redux';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -28,6 +28,10 @@ const PairDeviceScreen = () => {
     if (isFocused) {
       initStartScan()
     }
+
+    return () => {
+      RNBluetoothClassic.cancelDiscovery();
+    }
   }, [isFocused])
 
   const initStartScan = async () => {
@@ -35,9 +39,6 @@ const PairDeviceScreen = () => {
     const result = await scanBluetoothClassic()
 
     setDevices(result);
-
-    // Cari device bernama G300_FD8C
-    // Filter semua device yang nama persisnya G300_FD8C
     const targets = result.filter((d) => d.name === 'MO1');
 
     if (targets.length > 0) {

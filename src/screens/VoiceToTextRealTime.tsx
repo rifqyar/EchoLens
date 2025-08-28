@@ -9,6 +9,8 @@ import { Button, Snackbar, Surface, Text } from 'react-native-paper'
 import LinearGradient from 'react-native-linear-gradient'
 import { useIsFocused } from '@react-navigation/native'
 import AudioRecord from 'react-native-audio-record'
+import BluetoothSco from '../ble/BluetoothSco'
+import { useAppSelector } from '../redux/store'
 import RNFS from 'react-native-fs';
 
 type Transcription = {
@@ -37,7 +39,7 @@ type NotifState = {
   text: string
 }
 
-const VoiceToTextScreen = () => {
+const VoiceToTextRealtime = () => {
   const [selectedIn, setSelectedIn] = useState<string>("");
   const [selectedOut, setSelectedOut] = useState<string>("");
   const [partialOriginal, setPartialOriginal] = useState("");
@@ -46,7 +48,12 @@ const VoiceToTextScreen = () => {
   const isFocused = useIsFocused()
   const ws = useRef<WebSocket | null>(null);
   const [notifLang, setNotifLang] = React.useState(false);
-  const onDismissSnackBar = () => setNotifLang(false);
+  const [notifPeripheral, setNotifPeripheral] = React.useState(false);
+  const onDismissNotifLang = () => setNotifLang(false);
+  const onDismissNotifDevice = () => setNotifPeripheral(false);
+  const [state, setState] = React.useState('Idle');
+  const device = useAppSelector((state) => state.deviceConnectionReducer?.device)
+
   const [notifSaved, setNotifSavedFile] = useState<NotifState>({
     visible: false,
     text: ''
@@ -73,6 +80,14 @@ const VoiceToTextScreen = () => {
       ws.current?.close()
     }
   }, [])
+
+  useEffect(() => {
+    const sub = BluetoothSco.addListener((s) => {
+      console.log('SCO State:', s);
+      setState(s);
+    });
+    return () => sub.remove();
+  }, []);
 
   const connectToWs = async () => {
     ws.current = new WebSocket("ws://182.253.172.27:30080/ws/transcribe");
@@ -108,53 +123,61 @@ const VoiceToTextScreen = () => {
   // Start Recording
   // ======================
   const startRecording = async () => {
-    if (selectedIn != '' && selectedOut != '') {
-      if (ws.current && ws.current.readyState === WebSocket.OPEN) {
-        setPartialOriginal('')
-        setPartialTranslated('')
+    const startSco = async () => {
+      BluetoothSco.startSco(); // aktifkan mic Bluetooth
+    }
 
-        console.log('🎙️ Start Recording...');
-        ws.current.send(JSON.stringify({
-          type: "start",
-          input_lang: selectedIn,
-          output_lang: selectedOut,
-        }));
+    const peripheralConnected = await checkConnectedPeripheral() ?? false
+    if (peripheralConnected) {
+      if (selectedIn != '' && selectedOut != '') {
+        if (ws.current && ws.current.readyState === WebSocket.OPEN) {
+          await startSco()
+          setPartialOriginal('')
+          setPartialTranslated('')
 
-        AudioRecord.init({
-          sampleRate: 16000,
-          channels: 1,
-          bitsPerSample: 16,
-          wavFile: 'temp_record.wav',
-        });
+          console.log('🎙️ Start Recording...');
+          ws.current.send(JSON.stringify({
+            type: "start",
+            input_lang: selectedIn,
+            output_lang: selectedOut,
+          }));
 
-        // ambil data PCM dari native modul
-        AudioRecord.on('data', (data: string) => {
-          if (ws.current && ws.current.readyState === WebSocket.OPEN) {
-            ws.current.send(JSON.stringify({
-              type: 'audio_chunk',
-              data: data,
-            }));
-          }
-        });
+          AudioRecord.init({
+            sampleRate: 16000,
+            channels: 1,
+            bitsPerSample: 16,
+            wavFile: 'temp_record.wav',
+          });
 
-        AudioRecord.start();
-        setListening(true);
+          // ambil data PCM dari native modul
+          AudioRecord.on('data', (data: string) => {
+            if (ws.current && ws.current.readyState === WebSocket.OPEN) {
+              ws.current.send(JSON.stringify({
+                type: 'audio_chunk',
+                data: data,
+              }));
+            }
+          });
+
+          AudioRecord.start();
+          setListening(true);
+        } else {
+          await connectToWs()
+          startRecording()
+        }
       } else {
-        await connectToWs()
-        startRecording()
+        setNotifLang(true)
       }
     } else {
-      setNotifLang(true)
+      setNotifPeripheral(true)
     }
   };
 
   const stopRecording = async () => {
-    console.log('⏹️ Stop Recording...');
     const filePath = await AudioRecord.stop();
     console.log('Saved file:', filePath);
-
-    // Matikan listener supaya nggak kirim chunk lagi
-    AudioRecord.on('data', () => { }); // reset callback jadi kosong
+    AudioRecord.on('data', () => { });
+    BluetoothSco.stopSco()
 
     if (ws.current && ws.current.readyState === WebSocket.OPEN) {
       ws.current.send(JSON.stringify({ type: 'end' }));
@@ -176,17 +199,22 @@ const VoiceToTextScreen = () => {
       }
 
       await RNFS.moveFile(filePath, destPath);
+
       setNotifSavedFile({
         visible: true,
         text: '📂 File moved to: ' + destPath
       })
-      
       console.log('📂 File moved to:', destPath);
     } catch (err) {
       console.error('❌ Gagal simpan file:', err);
     }
+
     setListening(false);
   };
+
+  const checkConnectedPeripheral = async () => {
+    if (Object.keys(device).length > 0) return true
+  }
 
   async function requestAudioPermissions() {
     if (Platform.OS === "android") {
@@ -220,7 +248,7 @@ const VoiceToTextScreen = () => {
 
   return (
     <>
-      <AppHeader title='Voice To Text' withBack />
+      <AppHeader title='Realtime Transcribe' withBack />
       <ScreenLayout withBackgroundImg edges={['left', 'right']} style={{ marginHorizontal: 20 }}>
         {/* Header  */}
         <SectionLayout style={styles.headerWrapper}>
@@ -308,7 +336,7 @@ const VoiceToTextScreen = () => {
 
       <Snackbar
         visible={notifLang}
-        onDismiss={onDismissSnackBar}
+        onDismiss={onDismissNotifLang}
         action={{
           label: 'Close',
           onPress: () => {
@@ -316,6 +344,18 @@ const VoiceToTextScreen = () => {
           },
         }}>
         Please Select Language Input & Output First
+      </Snackbar>
+
+      <Snackbar
+        visible={notifPeripheral}
+        onDismiss={onDismissNotifDevice}
+        action={{
+          label: 'Close',
+          onPress: () => {
+            setNotifPeripheral(false)
+          },
+        }}>
+        Please Connect to Peripheral First
       </Snackbar>
 
       <Snackbar
@@ -336,7 +376,7 @@ const VoiceToTextScreen = () => {
   )
 }
 
-export default VoiceToTextScreen
+export default VoiceToTextRealtime
 
 const styles = StyleSheet.create({
   headerWrapper: {

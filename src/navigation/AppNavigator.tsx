@@ -17,6 +17,7 @@ import HomeScreen from '../screens/HomeScreen'
 import { COLORS } from '../assets/theme'
 import VoiceToTextScreen from '../screens/VoiceToText'
 import BottomTabBar from '../components/layout/BottomTabBar'
+import VoiceToTextRealtime from '../screens/VoiceToTextRealTime'
 
 type MainStackParamList = {
   Login: undefined
@@ -26,6 +27,7 @@ type MainStackParamList = {
   PairDeviceScreen: undefined
   ScanDeviceScreen: undefined
   VoiceToTextScreen: undefined
+  VoiceToTextRealtime: undefined
 }
 
 const MainStack =
@@ -142,6 +144,10 @@ const AppNavigator = memo(
           <MainStack.Screen
             name={'VoiceToTextScreen'}
             component={VoiceToTextScreen}
+          />
+          <MainStack.Screen
+            name={'VoiceToTextRealtime'}
+            component={VoiceToTextRealtime}
           />
         </MainStack.Navigator>
       </NavigationContainer>
