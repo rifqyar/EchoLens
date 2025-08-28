@@ -109,6 +109,7 @@ const VoiceToTextScreen = () => {
   // ======================
   const startRecording = async () => {
     if (selectedIn != '' && selectedOut != '') {
+      console.log(ws.current && ws.current.readyState)
       if (ws.current && ws.current.readyState === WebSocket.OPEN) {
         setPartialOriginal('')
         setPartialTranslated('')
@@ -151,7 +152,7 @@ const VoiceToTextScreen = () => {
   const stopRecording = async () => {
     console.log('⏹️ Stop Recording...');
     const filePath = await AudioRecord.stop();
-    console.log('Saved file:', filePath);
+    console.log('Saved file:', filePath); 
 
     // Matikan listener supaya nggak kirim chunk lagi
     AudioRecord.on('data', () => { }); // reset callback jadi kosong

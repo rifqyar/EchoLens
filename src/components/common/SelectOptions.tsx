@@ -61,6 +61,7 @@ const SelectOptions: React.FC<SelectProps> = ({
         ]}
       >
         <Picker
+          mode="dropdown"
           selectedValue={selectedValue}
           onValueChange={(itemValue) => onValueChange(itemValue)}
           style={styles.picker}
@@ -73,7 +74,7 @@ const SelectOptions: React.FC<SelectProps> = ({
               key={opt.value}
               label={opt.label}
               value={opt.value}
-              color="#0b0b0bff"
+              color="#FFF"
             />
           ))}
         </Picker>
