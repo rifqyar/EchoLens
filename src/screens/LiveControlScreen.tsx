@@ -1,6 +1,6 @@
 import { Alert, Linking, NativeEventEmitter, NativeModules, PermissionsAndroid, Platform, ScrollView, StatusBar, StyleSheet, TouchableOpacity, View } from 'react-native'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
-import { useIsFocused } from '@react-navigation/native'
+import { useFocusEffect, useIsFocused } from '@react-navigation/native'
 import { Button, Surface, Switch, Text, Title, useTheme } from 'react-native-paper'
 import { AppHeader } from '../components/layout/AppHeader'
 import { ScreenLayout } from '../components/layout/ScreenLayout'
@@ -58,12 +58,17 @@ const LiveControlScreen = () => {
   }, [isFocused])
 
   const [state, setState] = React.useState('Idle');
+  useFocusEffect(
+    useCallback(() => {
+      const sub = BluetoothSco.addListener((s) => {
+        console.log('SCO State:', s);
+        setState(s);
+      });
+      return () => sub.remove();
+    }, [])
+  )
   useEffect(() => {
-    const sub = BluetoothSco.addListener((s) => {
-      console.log('SCO State:', s);
-      setState(s);
-    });
-    return () => sub.remove();
+
   }, []);
 
   /** Lama */
@@ -222,7 +227,7 @@ const LiveControlScreen = () => {
       setPartialOriginal('')
       setPartialTranslated('')
       const hasPermission = await requestStoragePermission();
-      
+
       if (hasPermission) {
         await startSco()
         console.log('🎙️ Start Recording...');

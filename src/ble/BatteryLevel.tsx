@@ -3,7 +3,7 @@ import BleManager from 'react-native-ble-manager';
 import { NativeEventEmitter, NativeModules } from 'react-native';
 
 const BleManagerModule = NativeModules.BleManager;
-const bleManagerEmitter = new NativeEventEmitter(BleManagerModule);
+const bleManagerEmitter = new NativeEventEmitter();
 
 export function useBatteryLevel(peripheralId: any) {
   const [batteryLevel, setBatteryLevel] = useState(null);

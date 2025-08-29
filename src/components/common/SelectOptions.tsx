@@ -75,6 +75,7 @@ const SelectOptions: React.FC<SelectProps> = ({
               label={opt.label}
               value={opt.value}
               color="#FFF"
+              style={{backgroundColor: COLORS.tertiary}}
             />
           ))}
         </Picker>

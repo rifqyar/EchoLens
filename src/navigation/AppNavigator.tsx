@@ -4,22 +4,22 @@ import {
 } from '@react-navigation/native'
 import { createStackNavigator } from '@react-navigation/stack'
 import { memo, useEffect, useRef } from 'react'
-import { Alert, BackHandler, Image, View } from 'react-native'
 import LoginScreen from '../screens/LoginScreen'
-import { TabNavigator } from './TabNavigator'
-import StackBottomTabBar from '../components/layout/StackBottomTabBar'
 import LiveControlScreen from '../screens/LiveControlScreen'
 import PairDeviceScreenOnBoard from '../screens/PairDeviceScreenOnBoard'
 import PairDeviceScreen from '../screens/PairDeviceScreen'
 import ScanDevicesScreen from '../screens/ScanDeviceScreen'
 import React from 'react'
-import HomeScreen from '../screens/HomeScreen'
-import { COLORS } from '../assets/theme'
 import VoiceToTextScreen from '../screens/VoiceToText'
 import BottomTabBar from '../components/layout/BottomTabBar'
 import VoiceToTextRealtime from '../screens/VoiceToTextRealTime'
+import { Alert, BackHandler } from 'react-native'
+import { createNativeStackNavigator } from '@react-navigation/native-stack'
+import HomeScreen from '../screens/HomeScreen'
+import HistoryScreen from '../screens/HistoryScreen'
 
 type MainStackParamList = {
+  Home: undefined
   Login: undefined
   Main: undefined
   LiveControl: undefined
@@ -28,10 +28,11 @@ type MainStackParamList = {
   ScanDeviceScreen: undefined
   VoiceToTextScreen: undefined
   VoiceToTextRealtime: undefined
+  HistoryScreen: undefined
 }
 
 const MainStack =
-  createStackNavigator<MainStackParamList>()
+  createNativeStackNavigator<MainStackParamList>()
 
 // Main App Navigator
 const AppNavigator = memo(
@@ -44,43 +45,6 @@ const AppNavigator = memo(
       undefined
     )
 
-    const backAction = () => {
-      if (
-        routeNameRef.current == 'Home' ||
-        routeNameRef.current == 'Login'
-      ) {
-        Alert.alert(
-          'Hold on!',
-          'Are you sure you want to exit app?',
-          [
-            {
-              text: 'Cancel',
-              onPress: () => {
-                return true
-              },
-              style: 'cancel',
-            },
-            {
-              text: 'YES',
-              onPress: () => BackHandler.exitApp(),
-            },
-          ]
-        )
-        return true
-      }
-    }
-
-    useEffect(() => {
-      const backHandler = BackHandler.addEventListener(
-        'hardwareBackPress',
-        backAction
-      )
-      console.log(backHandler)
-      return () => {
-        backHandler.remove()
-      }
-    }, [])
-
     const mainStackOptions = {
       headerShown: false,
       animation: 'fade_from_bottom' as const,
@@ -90,24 +54,19 @@ const AppNavigator = memo(
     return (
       <NavigationContainer
         ref={navigationRef}
-        onReady={() =>
-        (routeNameRef.current =
-          navigationRef.current?.getCurrentRoute()?.name)
-        }
-        onStateChange={async () => {
-          const currentRouteName =
-            navigationRef.current?.getCurrentRoute()?.name
-          routeNameRef.current = currentRouteName
+        onReady={() => {
+          routeNameRef.current = navigationRef.current?.getCurrentRoute()?.name;
+        }}
+        onStateChange={() => {
+          const currentRouteName = navigationRef.current?.getCurrentRoute()?.name;
+          routeNameRef.current = currentRouteName;
+          console.log("Route changed:", currentRouteName);
         }}
       >
         <MainStack.Navigator
           screenOptions={mainStackOptions}
           initialRouteName={isLoggedIn ? 'Main' : 'Login'}
         >
-          <MainStack.Screen
-            name="Login"
-            component={LoginScreen}
-          />
           <MainStack.Screen
             name={'Main'}
             // component={HomeScreen}
@@ -120,10 +79,15 @@ const AppNavigator = memo(
             //   title: 'Home',
             //   headerShown: true
             // }}
-            children={() => (
-              <BottomTabBar />
-            )}
+            // children={() => (
+            //   <BottomTabBar />
+            // )}
+            component={BottomTabBar}
             options={{ headerShown: false }}
+          />
+          <MainStack.Screen
+            name="Login"
+            component={LoginScreen}
           />
           <MainStack.Screen
             name={'PairDeviceOnBoard'}
@@ -148,6 +112,10 @@ const AppNavigator = memo(
           <MainStack.Screen
             name={'VoiceToTextRealtime'}
             component={VoiceToTextRealtime}
+          />
+          <MainStack.Screen
+            name='HistoryScreen'
+            component={HistoryScreen}
           />
         </MainStack.Navigator>
       </NavigationContainer>

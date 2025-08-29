@@ -4,7 +4,7 @@ import { PermissionsAndroid, Platform, NativeEventEmitter, NativeModules } from 
 import BleManager from 'react-native-ble-manager';
 
 const BleManagerModule = NativeModules.BleManager;
-const bleEmitter = new NativeEventEmitter(BleManagerModule);
+const bleEmitter = new NativeEventEmitter();
 
 // const manager = new BleManager();
 

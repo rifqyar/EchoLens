@@ -1,6 +1,6 @@
-import { Image, StatusBar, StyleSheet, Text, View, NativeEventEmitter, NativeModules, DeviceEventEmitter, TouchableOpacity } from 'react-native'
-import React, { useEffect, useState } from 'react'
-import { useIsFocused, useNavigation, NavigationProp } from '@react-navigation/native'
+import { Image, StatusBar, StyleSheet, Text, View, NativeEventEmitter, NativeModules, DeviceEventEmitter, TouchableOpacity, BackHandler, Alert } from 'react-native'
+import React, { useCallback, useEffect, useState } from 'react'
+import { useIsFocused, useNavigation, NavigationProp, useFocusEffect } from '@react-navigation/native'
 import { Button, Surface, useTheme } from 'react-native-paper'
 import { SectionLayout } from '../components/layout/SectionLayout'
 import { ScreenLayout } from '../components/layout/ScreenLayout'
@@ -35,12 +35,11 @@ declare module 'react-native-ble-manager' {
 }
 
 const BleManagerModule = NativeModules.BleManager;
-const bleManagerEmitter = new NativeEventEmitter(BleManagerModule);
+const bleManagerEmitter = new NativeEventEmitter();
 
-const HomeScreen = () => {
+const HomeScreen = ({ navigation }: any) => {
   const isFocused = useIsFocused()
   const theme = useTheme()
-  const navigation = useNavigation<NavigationProp<RootStackParamList>>()
   const device = useAppSelector((state) => state.deviceConnectionReducer?.device)
   const [deviceLocalState, setDeviceLocalState] = useState(device)
   const dispacth = useDispatch()
@@ -55,6 +54,29 @@ const HomeScreen = () => {
       checkConnectedBLE()
     }
   }, [isFocused])
+
+  useFocusEffect(
+    useCallback(() => {
+      const onBackPress = () => {
+        Alert.alert("Exit", "Yakin mau keluar aplikasi?", [
+          { text: "Cancel", style: "cancel" },
+          {
+            text: "YES", onPress: () => {
+              setTimeout(() => BackHandler.exitApp(), 200);
+            }
+          }
+        ]);
+        return true; // cegah default keluar app
+      };
+
+      const subscription = BackHandler.addEventListener(
+        "hardwareBackPress",
+        onBackPress
+      );
+
+      return () => subscription.remove();
+    }, [])
+  );
 
   const checkConnectedBLE = async () => {
     const devices = await checkBondedClassicPeripheral()
@@ -221,7 +243,7 @@ const HomeScreen = () => {
               if (Object.keys(device).length > 0) {
                 disconnectDevice()
               } else {
-                navigation.navigate('PairDeviceOnBoard')
+                navigation.push('PairDeviceOnBoard')
               }
             }}
           >

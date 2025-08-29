@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { StatusBar } from 'react-native'
 import { AppLoading } from '../components/layout/AppLoading'
 import AppNavigator from '../navigation/AppNavigator'

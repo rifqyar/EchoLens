@@ -7,7 +7,7 @@ type BluetoothScoType = {
 };
 
 const { BluetoothScoModule } = NativeModules;
-const eventEmitter = new NativeEventEmitter(BluetoothScoModule);
+const eventEmitter = new NativeEventEmitter();
 
 const BluetoothSco: BluetoothScoType = {
   startSco: () => BluetoothScoModule.startSco(),

@@ -12,6 +12,8 @@ import AudioRecord from 'react-native-audio-record'
 import BluetoothSco from '../ble/BluetoothSco'
 import { useAppSelector } from '../redux/store'
 import RNFS from 'react-native-fs';
+import LoadingScreen from '../components/common/LoadingScreen'
+import MaterialDesignIcons from '@react-native-vector-icons/material-design-icons'
 
 type Transcription = {
   original: string;
@@ -39,7 +41,7 @@ type NotifState = {
   text: string
 }
 
-const VoiceToTextRealtime = () => {
+const VoiceToTextRealtime = ({ navigation }: any) => {
   const [selectedIn, setSelectedIn] = useState<string>("");
   const [selectedOut, setSelectedOut] = useState<string>("");
   const [partialOriginal, setPartialOriginal] = useState("");
@@ -58,6 +60,10 @@ const VoiceToTextRealtime = () => {
     visible: false,
     text: ''
   })
+
+  const [textNotif, setTextNotif] = useState<string>('');
+  const [statusVisible, setStatusVisible] = useState<boolean>(false)
+
   const onDismissNotifSave = () => setNotifSavedFile({
     visible: false,
     text: ''
@@ -90,7 +96,8 @@ const VoiceToTextRealtime = () => {
   }, []);
 
   const connectToWs = async () => {
-    ws.current = new WebSocket("ws://182.253.172.27:30080/ws/transcribe");
+    ws.current = new WebSocket("ws://182.253.172.27:30080/ws/status");
+    // ws.current = new WebSocket("ws://172.20.10.2:4053/ws/status");
 
     ws.current.onopen = () => {
       console.log("Connected to Python server ✅ (waiting to start recording)");
@@ -99,20 +106,33 @@ const VoiceToTextRealtime = () => {
     ws.current.onmessage = (e) => {
       const msg = JSON.parse(e.data);
 
-      if (msg.type === "partial") {
-        setPartialOriginal(prev => (prev + " " + (msg.original_text || "")).trim());
-        setPartialTranslated(prev => (prev + " " + (msg.translated_text || "")).trim());
-      }
+      console.log(msg)
 
-      if (msg.type === "done") {
-        console.log("✅ Done received, ready for new session");
-      }
+      switch (msg.status) {
+        case 'uploading':
+          setStatusVisible(true)
+          setTextNotif('Uploading File')
+          break;
 
-      // if (msg.type === "final") {
-      //   console.log("🎯 Final:", msg.original_text, "→", msg.translated_text);
-      //   setPartialOriginal(msg.accumulated_original || '');
-      //   setPartialTranslated(msg.accumulated_translated || '');
-      // }
+        case 'transcribing':
+          setStatusVisible(true)
+          setTextNotif('Transcribing File')
+          break;
+
+        case 'translating':
+          setTextNotif(`Translating from ${selectedIn} to ${selectedOut}`)
+          break;
+
+        case 'done':
+          setPartialOriginal(msg.original_text)
+          setPartialTranslated(msg.translated_text)
+          setStatusVisible(false)
+          setTextNotif('')
+          break;
+
+        default:
+          break;
+      }
     };
 
     ws.current.onerror = (e) => console.error("WS Error", e);
@@ -135,28 +155,11 @@ const VoiceToTextRealtime = () => {
           setPartialOriginal('')
           setPartialTranslated('')
 
-          console.log('🎙️ Start Recording...');
-          ws.current.send(JSON.stringify({
-            type: "start",
-            input_lang: selectedIn,
-            output_lang: selectedOut,
-          }));
-
           AudioRecord.init({
             sampleRate: 16000,
             channels: 1,
             bitsPerSample: 16,
             wavFile: 'temp_record.wav',
-          });
-
-          // ambil data PCM dari native modul
-          AudioRecord.on('data', (data: string) => {
-            if (ws.current && ws.current.readyState === WebSocket.OPEN) {
-              ws.current.send(JSON.stringify({
-                type: 'audio_chunk',
-                data: data,
-              }));
-            }
           });
 
           AudioRecord.start();
@@ -175,8 +178,6 @@ const VoiceToTextRealtime = () => {
 
   const stopRecording = async () => {
     const filePath = await AudioRecord.stop();
-    console.log('Saved file:', filePath);
-    AudioRecord.on('data', () => { });
     BluetoothSco.stopSco()
 
     if (ws.current && ws.current.readyState === WebSocket.OPEN) {
@@ -189,6 +190,7 @@ const VoiceToTextRealtime = () => {
       const fileName = `recording-${selectedIn}-${timestamp}.wav`;
 
       const folderPath = `${RNFS.ExternalStorageDirectoryPath}/Documents/OptiLens/Audio`;
+      const folderText = `${RNFS.ExternalStorageDirectoryPath}/Documents/OptiLens/Text`;
       const destPath = `${folderPath}/${fileName}`;
 
       // pastikan folder ada
@@ -205,11 +207,86 @@ const VoiceToTextRealtime = () => {
         text: '📂 File moved to: ' + destPath
       })
       console.log('📂 File moved to:', destPath);
+
+      // === Upload ke server FastAPI ===
+      const formData = new FormData();
+      formData.append("file", {
+        uri: "file://" + destPath,
+        type: "audio/wav",
+        name: fileName,
+      });
+      formData.append("input_lang", selectedIn || "auto");
+      formData.append("output_lang", selectedOut || "id");
+
+      // const response = await fetch("http://172.20.10.2:4053/upload", {
+      const response = await fetch("http://182.253.172.27:30080/upload", {
+        method: "POST",
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+        body: formData,
+      });
+
+      const result = await response.json();
+      console.log("✅ Upload result:", result);
+
+      const destPathText = `${folderText}/${fileName}`;
+      const txtPath = await saveTranscriptToFile(destPathText);
+
+      if (txtPath) {
+        setNotifSavedFile({
+          visible: true,
+          text: "📝 Transcript saved to: " + txtPath,
+        });
+      }
     } catch (err) {
       console.error('❌ Gagal simpan file:', err);
     }
 
     setListening(false);
+  };
+
+  const saveTranscriptToFile = async (
+    audioPath: string,
+  ): Promise<string | undefined> => {
+    try {
+      const original = partialOriginal
+      const translated = partialTranslated
+      const langIn = selectedIn
+      const langOut = selectedOut
+
+      const folderPath = audioPath.substring(0, audioPath.lastIndexOf("/"));
+      const baseName = audioPath.substring(
+        audioPath.lastIndexOf("/") + 1,
+        audioPath.lastIndexOf(".")
+      );
+      const txtPath = `${folderPath}/${baseName}.txt`;
+
+      const now = new Date();
+      const timestamp = now.toISOString().replace("T", " ").substring(0, 19); // contoh: 2025-08-29 14:23:10
+
+      const content = `========================================
+                        📂 FILE NAME: ${baseName}.wav
+                        🕒 DATE: ${timestamp}
+                        ========================================
+  
+                        🔊 ORIGINAL TEXT
+                        ----------------------------------------
+                        ${original || "-"}
+  
+                        🌐 TRANSLATED TEXT (${langIn} → ${langOut})
+                        ----------------------------------------
+                        ${translated || "-"}
+                        `;
+
+      await RNFS.writeFile(txtPath, content, "utf8");
+      console.log("📝 Transcript saved to:", txtPath);
+
+      return txtPath;
+    } catch (err) {
+      console.error("❌ Gagal simpan transcript:", err);
+      return undefined;
+    }
   };
 
   const checkConnectedPeripheral = async () => {
@@ -246,9 +323,26 @@ const VoiceToTextRealtime = () => {
     return true; // iOS otomatis handle via Info.plist
   }
 
+  const HistoryButton = () => {
+    return (
+      <TouchableOpacity
+        style={{
+          marginRight: 10,
+        }}
+        onPress={() => {
+          navigation.push('HistoryScreen')
+        }}
+      >
+        <MaterialDesignIcons name='history' size={24} color={COLORS.lightGrey} />
+      </TouchableOpacity>
+    )
+  }
+
   return (
     <>
-      <AppHeader title='Realtime Transcribe' withBack />
+      <AppHeader title='Realtime Transcribe' withBack>
+        <HistoryButton />
+      </AppHeader>
       <ScreenLayout withBackgroundImg edges={['left', 'right']} style={{ marginHorizontal: 20 }}>
         {/* Header  */}
         <SectionLayout style={styles.headerWrapper}>
@@ -333,6 +427,12 @@ const VoiceToTextRealtime = () => {
           </View>
         </SectionLayout>
       </ScreenLayout>
+
+      {
+        statusVisible && (
+          <LoadingScreen withBackground children={<Text style={{ marginTop: 20 }} variant='bodyMedium'>{textNotif}</Text>} />
+        )
+      }
 
       <Snackbar
         visible={notifLang}
