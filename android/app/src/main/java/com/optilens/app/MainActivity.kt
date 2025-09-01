@@ -1,6 +1,6 @@
 package com.optilens.app
 
-import android.os.Bundle;
+// import android.os.Bundle;
 import android.view.KeyEvent
 import com.facebook.react.ReactActivity
 import com.facebook.react.ReactActivityDelegate
@@ -24,20 +24,20 @@ class MainActivity : ReactActivity() {
   override fun createReactActivityDelegate(): ReactActivityDelegate =
       DefaultReactActivityDelegate(this, mainComponentName, fabricEnabled)
 
-  override fun onCreate(savedInstanceState: Bundle?) {
-    super.onCreate(null)
-  }
+  // override fun onCreate(savedInstanceState: Bundle?) {
+  //   super.onCreate(null)
+  // }
 
-  override fun dispatchKeyEvent(event: KeyEvent): Boolean {
-    if (event.action == KeyEvent.ACTION_UP) {
-      val code = event.keyCode
-      // kirim event ke JS
-      val params = Arguments.createMap().apply { putInt("keyCode", code) }
-      reactInstanceManager
-        .currentReactContext
-        ?.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter::class.java)
-        ?.emit("HardwareKeyEvent", params)
-    }
-    return super.dispatchKeyEvent(event)
-  }
+  // override fun dispatchKeyEvent(event: KeyEvent): Boolean {
+  //   if (event.action == KeyEvent.ACTION_UP) {
+  //     val code = event.keyCode
+  //     // kirim event ke JS
+  //     val params = Arguments.createMap().apply { putInt("keyCode", code) }
+  //     reactInstanceManager
+  //       .currentReactContext
+  //       ?.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter::class.java)
+  //       ?.emit("HardwareKeyEvent", params)
+  //   }
+  //   return super.dispatchKeyEvent(event)
+  // }
 }

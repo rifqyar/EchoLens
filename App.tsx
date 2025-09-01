@@ -8,7 +8,6 @@ import { Provider } from 'react-redux';
 import store from './src/redux/store';
 
 function App(): React.JSX.Element {
-  const { DeviceInfoModule } = NativeModules;
   const theme = {
     ...MD3LightTheme, // or MD3DarkTheme
     roundness: 2,
@@ -33,9 +32,6 @@ function App(): React.JSX.Element {
     };
 
     init();
-    DeviceInfoModule.getDeviceModel()
-      .then((model: string) => console.log("Device model:", model))
-      .catch((err: any) => console.error(err));
   }, [])
 
   // Request microphone permission

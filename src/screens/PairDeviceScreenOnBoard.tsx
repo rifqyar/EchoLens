@@ -14,8 +14,8 @@ type RootStackParamList = {
   // add other routes here if needed
 };
 
-const PairDeviceScreenOnBoard = () => {
-  const navigation = useNavigation<NavigationProp<RootStackParamList>>()
+const PairDeviceScreenOnBoard = ({navigation} : any) => {
+  // const navigation = useNavigation<NavigationProp<RootStackParamList>>()
 
   return (
     <>
@@ -50,7 +50,7 @@ const PairDeviceScreenOnBoard = () => {
           <Button
             mode='contained'
             onPress={() => {
-              navigation.navigate('PairDeviceScreen')
+              navigation.push('PairDeviceScreen')
             }}
             style={{ width: '100%', marginBottom: 35 }}
             labelStyle={{ fontSize: 16, color: '#FFF' }}

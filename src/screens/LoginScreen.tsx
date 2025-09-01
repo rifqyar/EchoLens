@@ -124,11 +124,11 @@ const LoginScreen = ({ navigation }: LoginScreenProps) => {
           </Button>
         </SectionLayout>
 
-        <SectionLayout style={{ marginTop: 20 }} edges={['left', 'right']} >
+        {/* <SectionLayout style={{ marginTop: 20 }} edges={['left', 'right']} >
           <Text style={{ textAlign: 'center', color: theme.colors.surface }}>
             Aplikasi ini masih dalam tahap pengembangan. Beberapa fitur mungkin belum tersedia.
           </Text>
-        </SectionLayout>
+        </SectionLayout> */}
         {isLoading && <LoadingScreen withBackground={true} />}
       </View>
     </ScreenLayout>

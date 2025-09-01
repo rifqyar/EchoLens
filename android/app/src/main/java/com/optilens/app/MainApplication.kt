@@ -20,9 +20,7 @@ class MainApplication : Application(), ReactApplication {
             PackageList(this).packages.apply {
               // Packages that cannot be autolinked yet can be added manually here, for example:
               // add(MyReactNativePackage())
-              add(DeviceInfoPackage())
-              add(CameraIntentPackage())
-              add(WifiP2pPackage())
+              // add(WifiP2pPackage())
               add(BluetoothScoPackage())
             }
 
@@ -36,7 +34,7 @@ class MainApplication : Application(), ReactApplication {
 
   override val reactHost: ReactHost
     get() = getDefaultReactHost(applicationContext, reactNativeHost)
-
+    
   override fun onCreate() {
     super.onCreate()
     loadReactNative(this)

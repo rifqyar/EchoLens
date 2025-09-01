@@ -76,12 +76,10 @@ const VoiceToTextRealtime = ({ navigation }: any) => {
         console.warn("⚠️ Permission belum diberikan, tidak bisa rekam");
       } else {
         console.log("✅ Permission oke, siap rekam");
-        connectToWs();
       }
     };
 
     checkPermissions();
-    connectToWs()
     return () => {
       ws.current?.close()
     }
@@ -95,48 +93,61 @@ const VoiceToTextRealtime = ({ navigation }: any) => {
     return () => sub.remove();
   }, []);
 
-  const connectToWs = async () => {
-    ws.current = new WebSocket("ws://182.253.172.27:30080/ws/status");
-    // ws.current = new WebSocket("ws://172.20.10.2:4053/ws/status");
+  const connectToWs = async (jobId: any): Promise<void> => {
+    return new Promise((resolve, reject) => {
+      ws.current = new WebSocket(`ws://182.253.172.27:30080/ws/status/${jobId}`);
+      // ws.current = new WebSocket(`ws://172.20.10.2:4053/ws/status/${jobId}`);
 
-    ws.current.onopen = () => {
-      console.log("Connected to Python server ✅ (waiting to start recording)");
-    };
+      ws.current.onopen = () => {
+        console.log(`Connected to Python server ✅ (job_id=${jobId})`);
+        resolve()
+      };
 
-    ws.current.onmessage = (e) => {
-      const msg = JSON.parse(e.data);
+      ws.current.onmessage = async (e) => {
+        const msg = JSON.parse(e.data);
 
-      console.log(msg)
+        console.log(msg)
 
-      switch (msg.status) {
-        case 'uploading':
-          setStatusVisible(true)
-          setTextNotif('Uploading File')
-          break;
+        switch (msg.status) {
+          case 'uploading':
+            setStatusVisible(true)
+            setTextNotif('Uploading File')
+            break;
 
-        case 'transcribing':
-          setStatusVisible(true)
-          setTextNotif('Transcribing File')
-          break;
+          case 'transcribing':
+            setStatusVisible(true)
+            setTextNotif('Transcribing File')
+            break;
 
-        case 'translating':
-          setTextNotif(`Translating from ${selectedIn} to ${selectedOut}`)
-          break;
+          case 'translating':
+            setTextNotif(`Translating from ${selectedIn} to ${selectedOut}`)
+            break;
 
-        case 'done':
-          setPartialOriginal(msg.original_text)
-          setPartialTranslated(msg.translated_text)
-          setStatusVisible(false)
-          setTextNotif('')
-          break;
+          case 'done':
+            setPartialOriginal(msg.original_text)
+            setPartialTranslated(msg.translated_text)
+            setStatusVisible(false)
+            const textPath = await saveTranscriptToFile(jobId, msg.original_text, msg.translated_text)
+            if (textPath) {
+              setNotifSavedFile({
+                visible: true,
+                text: "📝 Transcript saved to: " + textPath,
+              });
+            }
+            setTextNotif('')
+            break;
 
-        default:
-          break;
-      }
-    };
+          default:
+            break;
+        }
+      };
 
-    ws.current.onerror = (e) => console.error("WS Error", e);
-    ws.current.onclose = () => console.log("WS Closed");
+      ws.current.onerror = (e) => {
+        console.error("WS Error", e)
+        reject(e);
+      };
+      ws.current.onclose = () => console.log("WS Closed");
+    });
   };
 
   // ======================
@@ -150,24 +161,19 @@ const VoiceToTextRealtime = ({ navigation }: any) => {
     const peripheralConnected = await checkConnectedPeripheral() ?? false
     if (peripheralConnected) {
       if (selectedIn != '' && selectedOut != '') {
-        if (ws.current && ws.current.readyState === WebSocket.OPEN) {
-          await startSco()
-          setPartialOriginal('')
-          setPartialTranslated('')
+        await startSco()
+        setPartialOriginal('')
+        setPartialTranslated('')
 
-          AudioRecord.init({
-            sampleRate: 16000,
-            channels: 1,
-            bitsPerSample: 16,
-            wavFile: 'temp_record.wav',
-          });
+        AudioRecord.init({
+          sampleRate: 16000,
+          channels: 1,
+          bitsPerSample: 16,
+          wavFile: 'temp_record.wav',
+        });
 
-          AudioRecord.start();
-          setListening(true);
-        } else {
-          await connectToWs()
-          startRecording()
-        }
+        AudioRecord.start();
+        setListening(true);
       } else {
         setNotifLang(true)
       }
@@ -179,10 +185,6 @@ const VoiceToTextRealtime = ({ navigation }: any) => {
   const stopRecording = async () => {
     const filePath = await AudioRecord.stop();
     BluetoothSco.stopSco()
-
-    if (ws.current && ws.current.readyState === WebSocket.OPEN) {
-      ws.current.send(JSON.stringify({ type: 'end' }));
-    }
 
     // === Simpan ke folder Documents/OptiLens ===
     try {
@@ -200,43 +202,49 @@ const VoiceToTextRealtime = ({ navigation }: any) => {
         console.log('📁 Folder created:', folderPath);
       }
 
-      await RNFS.moveFile(filePath, destPath);
+      // pastikan folder ada
+      const existsText = await RNFS.exists(folderText);
+      if (!existsText) {
+        await RNFS.mkdir(folderText);
+        console.log('📁 Folder created:', folderText);
+      }
 
+      await RNFS.moveFile(filePath, destPath);
       setNotifSavedFile({
         visible: true,
         text: '📂 File moved to: ' + destPath
       })
+
       console.log('📂 File moved to:', destPath);
+      await connectToWs(timestamp)
 
-      // === Upload ke server FastAPI ===
-      const formData = new FormData();
-      formData.append("file", {
-        uri: "file://" + destPath,
-        type: "audio/wav",
-        name: fileName,
-      });
-      formData.append("input_lang", selectedIn || "auto");
-      formData.append("output_lang", selectedOut || "id");
+      if (ws.current && ws.current.readyState === WebSocket.OPEN) {
+        // === Upload ke server FastAPI ===
+        const formData = new FormData();
+        formData.append("input_lang", selectedIn);
+        formData.append("output_lang", selectedOut);
+        formData.append("file", {
+          uri: "file://" + destPath,
+          type: "audio/wav",
+          name: fileName,
+        });
+        formData.append("job_id", timestamp);
 
-      // const response = await fetch("http://172.20.10.2:4053/upload", {
-      const response = await fetch("http://182.253.172.27:30080/upload", {
-        method: "POST",
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-        body: formData,
-      });
+        // const response = await fetch("http://172.20.10.2:4053/upload", {
+        const response = await fetch("http://182.253.172.27:30080/upload", {
+          method: "POST",
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+          body: formData,
+        });
 
-      const result = await response.json();
-      console.log("✅ Upload result:", result);
-
-      const destPathText = `${folderText}/${fileName}`;
-      const txtPath = await saveTranscriptToFile(destPathText);
-
-      if (txtPath) {
+        const result = await response.json();
+        console.log("✅ Upload result:", result);
+      } else {
         setNotifSavedFile({
           visible: true,
-          text: "📝 Transcript saved to: " + txtPath,
+          text: "Gagal terhubung ke Backend API, cek koneksi anda"
         });
       }
     } catch (err) {
@@ -246,43 +254,36 @@ const VoiceToTextRealtime = ({ navigation }: any) => {
     setListening(false);
   };
 
-  const saveTranscriptToFile = async (
-    audioPath: string,
-  ): Promise<string | undefined> => {
+  const saveTranscriptToFile = async (id: any, original: string, translated: string) => {
     try {
-      const original = partialOriginal
-      const translated = partialTranslated
       const langIn = selectedIn
       const langOut = selectedOut
 
-      const folderPath = audioPath.substring(0, audioPath.lastIndexOf("/"));
-      const baseName = audioPath.substring(
-        audioPath.lastIndexOf("/") + 1,
-        audioPath.lastIndexOf(".")
-      );
-      const txtPath = `${folderPath}/${baseName}.txt`;
+      const folderText = `${RNFS.ExternalStorageDirectoryPath}/Documents/OptiLens/Text`;
+      const fileName = `recording-${selectedIn}-${id}.txt`;
+      const destPath = `${folderText}/${fileName}`;
 
       const now = new Date();
-      const timestamp = now.toISOString().replace("T", " ").substring(0, 19); // contoh: 2025-08-29 14:23:10
+      const timestamp = now.toISOString().replace("T", " ").substring(0, 19);
 
       const content = `========================================
-                        📂 FILE NAME: ${baseName}.wav
-                        🕒 DATE: ${timestamp}
-                        ========================================
-  
-                        🔊 ORIGINAL TEXT
-                        ----------------------------------------
-                        ${original || "-"}
-  
-                        🌐 TRANSLATED TEXT (${langIn} → ${langOut})
-                        ----------------------------------------
-                        ${translated || "-"}
-                        `;
+📂 FILE NAME: ${fileName}.wav
+🕒 DATE: ${timestamp}
+========================================
 
-      await RNFS.writeFile(txtPath, content, "utf8");
-      console.log("📝 Transcript saved to:", txtPath);
+🔊 ORIGINAL TEXT
+----------------------------------------
+${original || "-"}
 
-      return txtPath;
+🌐 TRANSLATED TEXT (${langIn} → ${langOut})
+----------------------------------------
+${translated || "-"}
+`;
+
+      await RNFS.writeFile(destPath, content, "utf8");
+      console.log("📝 Transcript saved to:", destPath);
+
+      return destPath;
     } catch (err) {
       console.error("❌ Gagal simpan transcript:", err);
       return undefined;

@@ -55,29 +55,6 @@ const HomeScreen = ({ navigation }: any) => {
     }
   }, [isFocused])
 
-  useFocusEffect(
-    useCallback(() => {
-      const onBackPress = () => {
-        Alert.alert("Exit", "Yakin mau keluar aplikasi?", [
-          { text: "Cancel", style: "cancel" },
-          {
-            text: "YES", onPress: () => {
-              setTimeout(() => BackHandler.exitApp(), 200);
-            }
-          }
-        ]);
-        return true; // cegah default keluar app
-      };
-
-      const subscription = BackHandler.addEventListener(
-        "hardwareBackPress",
-        onBackPress
-      );
-
-      return () => subscription.remove();
-    }, [])
-  );
-
   const checkConnectedBLE = async () => {
     const devices = await checkBondedClassicPeripheral()
 
@@ -272,7 +249,7 @@ const HomeScreen = ({ navigation }: any) => {
           <TouchableOpacity
             style={styles.actionButton}
             onPress={() => {
-              navigation.navigate('VoiceToTextScreen')
+              navigation.push('VoiceToTextScreen')
             }}
           >
             <LinearGradient
@@ -292,7 +269,7 @@ const HomeScreen = ({ navigation }: any) => {
           <TouchableOpacity
             style={styles.actionButton}
             onPress={() => {
-              navigation.navigate('VoiceToTextRealtime')
+              navigation.push('VoiceToTextRealtime')
             }}
           >
             <LinearGradient

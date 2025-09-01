@@ -98,7 +98,7 @@ const ProfileScreen = ({ navigation }: ProfileScreenProps) => {
                 source={{ uri: user.photo ?? `https://ui-avatars.com/api/?name=${user.name}` }}
                 style={styles.profileImage}
               />
-              <TouchableOpacity
+              {/* <TouchableOpacity
                 style={styles.editButton}
                 onPress={() => console.log('Edit pressed')}
               >
@@ -110,37 +110,43 @@ const ProfileScreen = ({ navigation }: ProfileScreenProps) => {
                 >
                   <MaterialDesignIcons name='pencil' size={26} color={COLORS.secondary} />
                 </LinearGradient>
-              </TouchableOpacity>
+              </TouchableOpacity> */}
             </View>
 
             <Text style={styles.userName}>{user.name}</Text>
           </View>
         </LinearGradient>
 
-        {/* Menu Card 1: Account and Security */}
-        <LinearGradient
+        <View style={{ flex: 1 }}>
+          {/* Menu Card 1: Account and Security */}
+          {/* <LinearGradient
           colors={[COLORS.background, COLORS.tertiary]}
           style={styles.menuCard}
         >
           {renderMenuItem('account-circle', 'Account and Security', () => console.log('Account pressed'))}
-        </LinearGradient>
+        </LinearGradient> */}
 
-        {/* Menu Card 2: Backend Permission Setting */}
-        <LinearGradient
+          {/* Menu Card 2: Backend Permission Setting */}
+          {/* <LinearGradient
           colors={[COLORS.background, COLORS.tertiary]}
           style={styles.menuCard}
         >
           {renderMenuItem('security', 'Backend Permission Setting', () => console.log('Backend pressed'))}
-        </LinearGradient>
-        {/* Menu Card 3: FAQ & About App */}
-        <LinearGradient
-          colors={[COLORS.background, COLORS.tertiary]}
-          style={styles.menuCard}
-        >
-          {renderMenuItem('help-circle', 'FAQ', () => console.log('FAQ pressed'))}
-          <Divider style={{marginTop: 5}} />
-          {renderMenuItem('information', 'About App', () => console.log('About App pressed'))}
-        </LinearGradient>
+        </LinearGradient> */}
+          {/* Menu Card 3: FAQ & About App */}
+          <LinearGradient
+            colors={[COLORS.background, COLORS.tertiary]}
+            style={styles.menuCard}
+          >
+            {renderMenuItem('help-circle', 'FAQ', () => {
+              navigation.push('FAQScreen')
+            })}
+            <Divider style={{ marginTop: 5 }} />
+            {renderMenuItem('information', 'About App', () => {
+              navigation.push('AboutScreen')
+            })}
+          </LinearGradient>
+        </View>
 
         {/* Logout Button */}
         <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
@@ -241,8 +247,8 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     backgroundColor: '#ff4d4d',
     alignItems: 'center',
-    position: 'relative',
-    bottom: -50
+    flex: 0.01,
+    position: 'relative'
   },
   logoutText: {
     color: '#fff',

@@ -17,6 +17,8 @@ import { Alert, BackHandler } from 'react-native'
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
 import HomeScreen from '../screens/HomeScreen'
 import HistoryScreen from '../screens/HistoryScreen'
+import FAQScreen from '../screens/FAQScreen'
+import AboutScreen from '../screens/AboutScreen'
 
 type MainStackParamList = {
   Home: undefined
@@ -29,6 +31,8 @@ type MainStackParamList = {
   VoiceToTextScreen: undefined
   VoiceToTextRealtime: undefined
   HistoryScreen: undefined
+  FAQScreen: undefined
+  AboutScreen: undefined
 }
 
 const MainStack =
@@ -50,6 +54,44 @@ const AppNavigator = memo(
       animation: 'fade_from_bottom' as const,
       headerShadowVisible: false,
     }
+
+    const backAction = () => {
+      if (
+        routeNameRef.current == 'Home' ||
+        routeNameRef.current == 'Login'
+      ) {
+        Alert.alert(
+          'Hold on!',
+          'Are you sure you want to exit app?',
+          [
+            {
+              text: 'Cancel',
+              onPress: () => {
+                return true
+              },
+              style: 'cancel',
+            },
+            {
+              text: 'YES',
+              onPress: () => BackHandler.exitApp(),
+            },
+          ]
+        )
+        return true
+      }
+    }
+
+    useEffect(() => {
+      const backHandler = BackHandler.addEventListener(
+        'hardwareBackPress',
+        backAction
+      )
+      console.log(backHandler)
+      return () => {
+        backHandler.remove()
+      }
+    }, [])
+
 
     return (
       <NavigationContainer
@@ -116,6 +158,14 @@ const AppNavigator = memo(
           <MainStack.Screen
             name='HistoryScreen'
             component={HistoryScreen}
+          />
+          <MainStack.Screen
+            name='FAQScreen'
+            component={FAQScreen}
+          />
+          <MainStack.Screen
+            name='AboutScreen'
+            component={AboutScreen}
           />
         </MainStack.Navigator>
       </NavigationContainer>

@@ -87,14 +87,14 @@ export default function BottomTabBar() {
         },
         tabBarStyle: {
           backgroundColor: COLORS.background,
-          height: 70,
+          height: 80,
           paddingHorizontal: 10,
           borderColor: 'transparent'
         },
         tabBarItemStyle: {
           borderRadius: 50,
           marginHorizontal: 30,
-          marginVertical: 8
+          marginTop: 15
         },
         // tabBarActiveBackgroundColor: COLORS.secondary,
         tabBarButton: (props) => <CustomTabBarButton {...props} />,
