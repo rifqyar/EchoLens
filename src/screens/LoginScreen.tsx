@@ -1,7 +1,7 @@
 import { StatusBar, StyleSheet, Text, View } from 'react-native'
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { ScreenLayout } from '../components/layout/ScreenLayout'
-import { Button, useTheme } from 'react-native-paper'
+import { Button, Snackbar, useTheme } from 'react-native-paper'
 import { RouteProp, useIsFocused } from '@react-navigation/native'
 import { SectionLayout } from '../components/layout/SectionLayout'
 import { Section } from 'react-native-paper/lib/typescript/components/Drawer/Drawer'
@@ -35,6 +35,11 @@ interface LoginScreenProps {
   route: LoginScreenRouteProp
 }
 
+type NotifState = {
+  visible: boolean,
+  text: string
+}
+
 const LoginScreen = ({ navigation }: LoginScreenProps) => {
   const theme = useTheme()
   const isFocused = useIsFocused()
@@ -42,6 +47,16 @@ const LoginScreen = ({ navigation }: LoginScreenProps) => {
   const isLoading = useAppSelector(
     (store) => store.loading.loading
   )
+
+  const [notifVisible, setNotifVisible] = useState<NotifState>({
+    visible: false,
+    text: ''
+  })
+
+  const onDismissNotif = () => setNotifVisible({
+    visible: false,
+    text: ''
+  })
 
   const webClientId = process.env.GOOGLE_WEBCLIENT_ID
 
@@ -63,25 +78,33 @@ const LoginScreen = ({ navigation }: LoginScreenProps) => {
       await GoogleSignin.hasPlayServices();
       const userInfo = await GoogleSignin.signIn();
 
-      const user = userInfo.data?.user
-      const dataUser = {
-        id: user?.id,
-        email: user?.email,
-        name: user?.familyName + ' ' + user?.givenName,
-        photo: user?.photo,
+      console.log(userInfo.type)
+      if (userInfo.type == 'cancelled') {
+        setNotifVisible({
+          visible: true,
+          text: 'User Cancelled Login'
+        })
+      } else {
+        const user = userInfo.data?.user
+        const dataUser = {
+          id: user?.id,
+          email: user?.email,
+          name: user?.familyName + ' ' + user?.givenName,
+          photo: user?.photo,
+        }
+
+        await AsyncStorage.setItem(
+          'user',
+          JSON.stringify(dataUser)
+        )
+
+        dispatch({
+          type: 'LOGIN_SUCCESS',
+          payload: { user: dataUser },
+        })
+
+        navigation.navigate('Main');
       }
-
-      await AsyncStorage.setItem(
-        'user',
-        JSON.stringify(dataUser)
-      )
-
-      dispatch({
-        type: 'LOGIN_SUCCESS',
-        payload: { user: dataUser },
-      })
-
-      navigation.navigate('Main');
     } catch (error) {
       if (typeof error === 'object' && error !== null && 'code' in error) {
         const err = error as { code: string };
@@ -131,6 +154,21 @@ const LoginScreen = ({ navigation }: LoginScreenProps) => {
         </SectionLayout> */}
         {isLoading && <LoadingScreen withBackground={true} />}
       </View>
+
+      <Snackbar
+        visible={notifVisible.visible}
+        onDismiss={onDismissNotif}
+        action={{
+          label: 'Close',
+          onPress: () => {
+            setNotifVisible({
+              visible: false,
+              text: ''
+            })
+          },
+        }}>
+        {notifVisible.text ?? ''}
+      </Snackbar>
     </ScreenLayout>
   )
 }

@@ -245,7 +245,27 @@ const HomeScreen = ({ navigation }: any) => {
 
       {/* Main Menu */}
       <SectionLayout style={{ marginTop: 20, alignItems: 'center' }} edges={['left', 'right']} horizontalPadding={19}>
-        <View style={{ flexDirection: 'row', width: '100%', gap: 20 }}>
+        <View style={{ flexDirection: 'row', width: '100%', gap: 20, flexWrap: 'wrap' }}>
+          <TouchableOpacity
+            style={styles.actionButton}
+            onPress={() => {
+              navigation.push('SoundRecording')
+            }}
+          >
+            <LinearGradient
+              style={[styles.actionButton, {
+                justifyContent: 'center',
+                alignItems: 'center',
+                gap: 10,
+              }]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              colors={[COLORS.secondary, COLORS.darkBlue]}
+            >
+              <MaterialDesignIcons name='microphone-variant' size={25} color={theme.colors.onPrimary} />
+              <Text style={{ marginLeft: 5, color: theme.colors.onPrimary, fontSize: 12 }}>Recording Audio</Text>
+            </LinearGradient>
+          </TouchableOpacity>
           <TouchableOpacity
             style={styles.actionButton}
             onPress={() => {
@@ -262,8 +282,8 @@ const HomeScreen = ({ navigation }: any) => {
               end={{ x: 1, y: 1 }}
               colors={[COLORS.secondary, COLORS.darkBlue]}
             >
-              <MaterialDesignIcons name='microphone-outline' size={32} color={theme.colors.onPrimary} />
-              <Text style={{ marginLeft: 5, color: theme.colors.onPrimary, fontSize: 18 }}>Voice-to-Text</Text>
+              <MaterialDesignIcons name='microphone-outline' size={25} color={theme.colors.onPrimary} />
+              <Text style={{ marginLeft: 5, color: theme.colors.onPrimary, fontSize: 12 }}>Voice-to-Text</Text>
             </LinearGradient>
           </TouchableOpacity>
           <TouchableOpacity
@@ -282,8 +302,8 @@ const HomeScreen = ({ navigation }: any) => {
               end={{ x: 1, y: 1 }}
               colors={[COLORS.secondary, COLORS.darkBlue]}
             >
-              <MaterialDesignIcons name='ear-hearing' size={28} color={theme.colors.onPrimary} />
-              <Text style={{ marginLeft: 5, color: theme.colors.onPrimary, fontSize: 18 }}>Live Translation</Text>
+              <MaterialDesignIcons name='ear-hearing' size={25} color={theme.colors.onPrimary} />
+              <Text style={{ marginLeft: 5, color: theme.colors.onPrimary, fontSize: 12 }}>Live Translation</Text>
             </LinearGradient>
           </TouchableOpacity>
         </View>

@@ -1,4 +1,4 @@
-package com.optilens.app.wifip2p
+package com.optilens.wifip2p
 
 import android.content.Context
 import android.net.wifi.p2p.WifiP2pDeviceList

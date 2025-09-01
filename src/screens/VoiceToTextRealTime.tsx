@@ -334,7 +334,8 @@ ${translated || "-"}
           navigation.push('HistoryScreen')
         }}
       >
-        <MaterialDesignIcons name='history' size={24} color={COLORS.lightGrey} />
+        <Text style={{color: COLORS.secondary}}>History Recording</Text>
+        {/* <MaterialDesignIcons name='history' size={24} color={COLORS.lightGrey} /> */}
       </TouchableOpacity>
     )
   }

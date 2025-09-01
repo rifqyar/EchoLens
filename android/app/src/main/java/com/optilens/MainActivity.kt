@@ -1,4 +1,4 @@
-package com.optilens.app
+package com.optilens
 
 // import android.os.Bundle;
 import android.view.KeyEvent

@@ -26,6 +26,7 @@ export const AppHeader = (props: AppHeaderProps) => {
       {props.withBack && (
         <Appbar.BackAction
           color={theme.colors.onSecondary}
+          size={24}
           onPress={() =>
             props.goBackNavigation
               ? props.goBackNavigation()
@@ -33,7 +34,7 @@ export const AppHeader = (props: AppHeaderProps) => {
           }
         />
       )}
-      {props.title && <Appbar.Content color={theme.colors.onSecondary} title={props.title} />}
+      {props.title && <Appbar.Content color={theme.colors.onSecondary} title={props.title} titleStyle={{fontSize: 16, marginLeft: -10}} />}
       {props.children}
     </Appbar.Header>
   );

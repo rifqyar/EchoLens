@@ -18,7 +18,7 @@ module.exports = function (api) {
               allowUndefined: true,
               verbose: false,
             },
-          ],
+          ]
         ],
       },
     },

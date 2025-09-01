@@ -19,6 +19,7 @@ import HomeScreen from '../screens/HomeScreen'
 import HistoryScreen from '../screens/HistoryScreen'
 import FAQScreen from '../screens/FAQScreen'
 import AboutScreen from '../screens/AboutScreen'
+import SoundRecording from '../screens/SoundRecording'
 
 type MainStackParamList = {
   Home: undefined
@@ -33,6 +34,7 @@ type MainStackParamList = {
   HistoryScreen: undefined
   FAQScreen: undefined
   AboutScreen: undefined
+  SoundRecording: undefined
 }
 
 const MainStack =
@@ -166,6 +168,10 @@ const AppNavigator = memo(
           <MainStack.Screen
             name='AboutScreen'
             component={AboutScreen}
+          />
+          <MainStack.Screen
+            name='SoundRecording'
+            component={SoundRecording}
           />
         </MainStack.Navigator>
       </NavigationContainer>

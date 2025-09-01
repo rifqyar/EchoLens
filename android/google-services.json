@@ -1,78 +1,57 @@
 {
   "project_info": {
-    "project_number": "195136459550",
-    "project_id": "echolens-dev",
-    "storage_bucket": "echolens-dev.firebasestorage.app"
+    "project_number": "403993697553",
+    "project_id": "optilens-df30d",
+    "storage_bucket": "optilens-df30d.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:195136459550:android:1f2f22ce94349e63f3ef0f",
+        "mobilesdk_app_id": "1:403993697553:android:14bd256297aef6230800b0",
         "android_client_info": {
-          "package_name": "com.echolens.app"
+          "package_name": "com.optilens"
         }
       },
       "oauth_client": [
         {
-          "client_id": "195136459550-b54ht989fk32jfpkfq22884hkb18p03a.apps.googleusercontent.com",
+          "client_id": "403993697553-2h6t33lpu6nggn376fr2mjcltv4da8g9.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.echolens.app",
+            "package_name": "com.optilens",
+            "certificate_hash": "0e8aa2cc2c70c2b77e6d2b3e6722c7fd05734357"
+          }
+        },
+        {
+          "client_id": "403993697553-87eq4huqekffqgubfktjh5cf6uptpqlj.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.optilens",
             "certificate_hash": "5e8f16062ea3cd2c4a0d547876baa6f38cabf625"
           }
         },
         {
-          "client_id": "195136459550-51p74b3v4fd6235m9tg9lgc4i90len3c.apps.googleusercontent.com",
-          "client_type": 3
-        }
-      ],
-      "api_key": [
-        {
-          "current_key": "AIzaSyDfxn6DZqWIMhsVXy_13liEgmZhwJBhoqc"
-        }
-      ],
-      "services": {
-        "appinvite_service": {
-          "other_platform_oauth_client": [
-            {
-              "client_id": "195136459550-51p74b3v4fd6235m9tg9lgc4i90len3c.apps.googleusercontent.com",
-              "client_type": 3
-            }
-          ]
-        }
-      }
-    },
-    {
-      "client_info": {
-        "mobilesdk_app_id": "1:195136459550:android:4880b64b25e7734df3ef0f",
-        "android_client_info": {
-          "package_name": "com.optilens.app"
-        }
-      },
-      "oauth_client": [
-        {
-          "client_id": "195136459550-ohn0hb5ophq439u35s7njth47k1jr66l.apps.googleusercontent.com",
+          "client_id": "403993697553-o4ntoao39kkhrfou0hl1mpsvos4fkfpm.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.optilens.app",
-            "certificate_hash": "b1f79cef48279e639c916d672ccc5bded6e07131"
+            "package_name": "com.optilens",
+            "certificate_hash": "4105d26dbceb7024e73b6744ee299255ca984871"
           }
         },
         {
-          "client_id": "195136459550-51p74b3v4fd6235m9tg9lgc4i90len3c.apps.googleusercontent.com",
+          "client_id": "403993697553-nka85319qptnqnp7v2l8ct7kmb9e5aqf.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyDfxn6DZqWIMhsVXy_13liEgmZhwJBhoqc"
+          "current_key": "AIzaSyDWCK7ZZD4F6pKHPkxuGfx2DEDNh9AkbUA"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "195136459550-51p74b3v4fd6235m9tg9lgc4i90len3c.apps.googleusercontent.com",
+              "client_id": "403993697553-nka85319qptnqnp7v2l8ct7kmb9e5aqf.apps.googleusercontent.com",
               "client_type": 3
             }
           ]

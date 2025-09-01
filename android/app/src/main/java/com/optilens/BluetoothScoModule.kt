@@ -1,4 +1,4 @@
-package com.optilens.app
+package com.optilens
 
 import android.content.BroadcastReceiver
 import android.content.Context
