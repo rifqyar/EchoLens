@@ -1,17 +1,18 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { View, StyleSheet, Text, Animated } from 'react-native';
+import { View, StyleSheet, Text, Animated, TouchableOpacity } from 'react-native';
 import { IconButton, Snackbar } from 'react-native-paper';
 import AudioRecord from 'react-native-audio-record';
 import { Buffer } from 'buffer';
 import { AppHeader } from '../components/layout/AppHeader';
 import RNFS from 'react-native-fs';
+import { COLORS } from '../assets/theme';
 
 type NotifState = {
   visible: boolean,
   text: string
 }
 
-const SoundRecording: React.FC = () => {
+const SoundRecording: React.FC = ({ navigation }: any) => {
   const [recording, setRecording] = useState<boolean>(false);
   const [recordTime, setRecordTime] = useState<string>('00:00');
   const buttonScale = useRef<Animated.Value>(new Animated.Value(1)).current;
@@ -112,9 +113,27 @@ const SoundRecording: React.FC = () => {
     }
   };
 
+  const HistoryButton = () => {
+    return (
+      <TouchableOpacity
+        style={{
+          marginRight: 10,
+        }}
+        onPress={() => {
+          navigation.push('HistoryScreen')
+        }}
+      >
+        <Text style={{ color: COLORS.secondary }}>History Recording</Text>
+        {/* <MaterialDesignIcons name='history' size={24} color={COLORS.lightGrey} /> */}
+      </TouchableOpacity>
+    )
+  }
+
   return (
     <>
-      <AppHeader withBack />
+      <AppHeader withBack >
+        <HistoryButton />
+      </AppHeader>
       <View style={styles.container}>
         <Text style={styles.timer}>{recordTime}</Text>
         <Animated.View style={{ transform: [{ scale: buttonScale }] }}>
