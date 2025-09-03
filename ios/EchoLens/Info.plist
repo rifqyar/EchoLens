@@ -2,6 +2,17 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>GoogleSignin</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>com.googleusercontent.apps.403993697553-h74ltao0vs725ah3sfhhr57bpn2jfqou</string>
+			</array>
+		</dict>
+	</array>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
@@ -36,9 +47,16 @@
 	<key>NSBluetoothPeripheralUsageDescription</key>
 	<string>OptiLens use Bluetooth for comunicating with smart glasses.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string></string>
+	<string>OptiLens need location access for finding nearby Devices</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>OptiLens need Microphone access for audio recording.</string>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>OptiLens need local connection for connect to smart glasses</string>
+	<key>NSBonjourServices</key>
+	<array>
+		<string>_http._tcp</string>
+		<string>_https._tcp</string>
+	</array>
 	<key>RCTNewArchEnabled</key>
 	<true/>
 	<key>UIBackgroundModes</key>

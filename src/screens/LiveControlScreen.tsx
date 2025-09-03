@@ -15,11 +15,8 @@ import axios from 'axios'
 import BleManager from 'react-native-ble-manager';
 import { useSmartGlassesTrigger } from '../ble/TriggerEvents'
 import BluetoothSco from '../ble/BluetoothSco'
-import AudioRecorderPlayer from 'react-native-audio-recorder-player';
 import { Buffer } from 'buffer'
 import AudioRecord from 'react-native-audio-record';
-
-const audioRecorderPlayer = AudioRecorderPlayer;
 
 const LiveControlScreen = () => {
   const isFocused = useIsFocused()
