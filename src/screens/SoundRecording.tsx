@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { View, StyleSheet, Text, Animated, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, Text, Animated, TouchableOpacity, Platform } from 'react-native';
 import { IconButton, Snackbar } from 'react-native-paper';
 import AudioRecord from 'react-native-audio-record';
 import { Buffer } from 'buffer';
@@ -82,9 +82,13 @@ const SoundRecording: React.FC = ({ navigation }: any) => {
     try {
       const timestamp = Date.now();
       const fileName = `recording-${timestamp}.wav`;
+      const basePath =
+        Platform.OS === 'android'
+          ? `${RNFS.ExternalStorageDirectoryPath}/Documents/OptiLens`
+          : `${RNFS.DocumentDirectoryPath}/OptiLens`;
 
-      const folderPath = `${RNFS.ExternalStorageDirectoryPath}/Documents/OptiLens/Audio`;
-      const folderText = `${RNFS.ExternalStorageDirectoryPath}/Documents/OptiLens/Text`;
+      const folderPath = `${basePath}/Audio`;
+      const folderText = `${basePath}/Text`;
       const destPath = `${folderPath}/${fileName}`;
 
       // pastikan folder ada

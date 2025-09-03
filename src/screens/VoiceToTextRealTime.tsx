@@ -145,6 +145,10 @@ const VoiceToTextRealtime = ({ navigation }: any) => {
 
       ws.current.onerror = (e) => {
         console.error("WS Error", e)
+        setNotifSavedFile({
+          visible: true,
+          text: "Failed Connect to Our Service, Please check your connection",
+        });
         reject(e);
       };
       ws.current.onclose = () => console.log("WS Closed");
@@ -191,9 +195,13 @@ const VoiceToTextRealtime = ({ navigation }: any) => {
     try {
       const timestamp = Date.now();
       const fileName = `recording-${selectedIn}-${timestamp}.wav`;
+      const basePath =
+        Platform.OS === 'android'
+          ? `${RNFS.ExternalStorageDirectoryPath}/Documents/OptiLens`
+          : `${RNFS.DocumentDirectoryPath}/OptiLens`;
 
-      const folderPath = `${RNFS.ExternalStorageDirectoryPath}/Documents/OptiLens/Audio`;
-      const folderText = `${RNFS.ExternalStorageDirectoryPath}/Documents/OptiLens/Text`;
+      const folderPath = `${basePath}/Audio`;
+      const folderText = `${basePath}/Text`;
       const destPath = `${folderPath}/${fileName}`;
 
       // pastikan folder ada
@@ -213,35 +221,46 @@ const VoiceToTextRealtime = ({ navigation }: any) => {
       await RNFS.moveFile(filePath, destPath);
       setNotifSavedFile({
         visible: true,
-        text: '📂 File moved to: ' + destPath
+        text: 'Recording Successfully Saved'
       })
 
       console.log('📂 File moved to:', destPath);
       await connectToWs(timestamp)
 
       if (ws.current && ws.current.readyState === WebSocket.OPEN) {
+        setStatusVisible(true)
+        setTextNotif('Uploading File')
+
         // === Upload ke server FastAPI ===
-        const formData = new FormData();
-        formData.append("input_lang", selectedIn);
-        formData.append("output_lang", selectedOut);
-        formData.append("file", {
-          uri: "file://" + destPath,
-          type: "audio/wav",
-          name: fileName,
-        });
-        formData.append("job_id", timestamp);
-
-        // const response = await fetch("http://172.20.10.2:4053/upload", {
-        const response = await fetch("https://optilens.rekayasadigital.com/upload", {
-          method: "POST",
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-          body: formData,
-        });
-
-        const result = await response.json();
-        console.log("✅ Upload result:", result);
+        try {
+          const formData = new FormData();
+          formData.append("input_lang", selectedIn);
+          formData.append("output_lang", selectedOut);
+          formData.append("file", {
+            uri: "file://" + destPath,
+            type: "audio/wav",
+            name: fileName,
+          });
+          formData.append("job_id", timestamp);
+  
+          // const response = await fetch("http://172.20.10.2:4053/upload", {
+          const response = await fetch("https://optilens.rekayasadigital.com/upload", {
+            method: "POST",
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+            body: formData,
+          });
+  
+          const result = await response.json();
+          console.log("✅ Upload result:", result);
+        } catch (uploadErr) {
+          console.error('❌ Upload gagal:', uploadErr);
+          setNotifSavedFile({
+            visible: true,
+            text: 'Failed upload to server, check your connection',
+          });
+        }
       } else {
         setNotifSavedFile({
           visible: true,
@@ -335,7 +354,7 @@ ${translated || "-"}
           navigation.push('HistoryScreen')
         }}
       >
-        <Text style={{color: COLORS.secondary}}>History Recording</Text>
+        <Text style={{ color: COLORS.secondary }}>History Recording</Text>
         {/* <MaterialDesignIcons name='history' size={24} color={COLORS.lightGrey} /> */}
       </TouchableOpacity>
     )

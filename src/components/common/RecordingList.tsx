@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, FlatList, ScrollView, StyleSheet } from "react-native";
+import { View, FlatList, ScrollView, StyleSheet, Platform } from "react-native";
 import RNFS from "react-native-fs";
 import Sound from "react-native-sound";
 import {
@@ -29,8 +29,13 @@ const RecordingsList: React.FC = () => {
 
   const loadRecordings = async () => {
     try {
-      const folderPath = `${RNFS.ExternalStorageDirectoryPath}/Documents/OptiLens/Audio`;
-      const textFolder = `${RNFS.ExternalStorageDirectoryPath}/Documents/OptiLens/Text`;
+      const basePath =
+        Platform.OS === 'android'
+          ? `${RNFS.ExternalStorageDirectoryPath}/Documents/OptiLens`
+          : `${RNFS.DocumentDirectoryPath}/OptiLens`;
+
+      const folderPath = `${basePath}/Audio`;
+      const textFolder = `${basePath}/Text`;
       const files = await RNFS.readDir(folderPath);
 
       console.log(files)
