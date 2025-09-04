@@ -4,7 +4,7 @@ import { PermissionsAndroid, Platform, NativeEventEmitter, NativeModules } from 
 import BleManager from 'react-native-ble-manager';
 
 const BleManagerModule = NativeModules.BleManager;
-const bleEmitter = new NativeEventEmitter();
+const bleEmitter = new NativeEventEmitter(BleManagerModule);
 
 // const manager = new BleManager();
 
@@ -63,33 +63,26 @@ export type Discovered = {
 // }
 
 export async function scanBluetoothClassic(): Promise<BluetoothDevice[]> {
-  try {
-    // Stop discovery kalau masih jalan
-    const isDiscovering = await RNBluetoothClassic.cancelDiscovery();
-    if (isDiscovering) {
-      console.log('🔹 Discovery masih jalan, menghentikan...');
-      await RNBluetoothClassic.cancelDiscovery();
-    }
-
-    console.log('=== Mulai discovery perangkat Bluetooth Classic ===');
-    const devices: BluetoothDevice[] = await RNBluetoothClassic.startDiscovery();
-
-    console.log(`Ditemukan ${devices.length} perangkat:`);
-    devices.forEach((device) => {
-      console.log('---');
-      console.log('Name:', device.name);
-      console.log('Address:', device.address);
-      console.log('Class:', device.deviceClass);
-      console.log('Bonded:', device.bonded);
-    });
-
-    return devices;
-  } catch (error) {
-    console.error('Error scanning Bluetooth Classic:', error);
-    return [];
-  } finally {
-    console.log('=== Selesai scanning ===');
+  // Stop discovery kalau masih jalan
+  const isDiscovering = await RNBluetoothClassic.cancelDiscovery();
+  if (isDiscovering) {
+    console.log('🔹 Discovery masih jalan, menghentikan...');
+    await RNBluetoothClassic.cancelDiscovery();
   }
+
+  console.log('=== Mulai discovery perangkat Bluetooth Classic ===');
+  const devices: BluetoothDevice[] = await RNBluetoothClassic.startDiscovery();
+
+  console.log(`Ditemukan ${devices.length} perangkat:`);
+  devices.forEach((device) => {
+    console.log('---');
+    console.log('Name:', device.name);
+    console.log('Address:', device.address);
+    console.log('Class:', device.deviceClass);
+    console.log('Bonded:', device.bonded);
+  });
+
+  return devices;
 }
 
 export async function connectToBluetoothClassic(address: string) {
@@ -149,8 +142,10 @@ export const checkBondedClassicPeripheral = async (): Promise<BluetoothDevice[]>
     const pairedDevices: BluetoothDevice[] = await RNBluetoothClassic.getBondedDevices();
 
     const availDevice = pairedDevices.filter((d) => d.name === 'MO1');
-    await RNBluetoothClassic.connectToDevice(availDevice[0].address)
-    
+    if(availDevice.length > 0){
+      await RNBluetoothClassic.connectToDevice(availDevice[0].address)
+    }
+
     return availDevice
   } catch (error) {
     console.error('Error checking connected Bluetooth Classic devices:', error);

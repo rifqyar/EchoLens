@@ -15,7 +15,6 @@ import BleManager, {
 } from 'react-native-ble-manager';
 import { loading, notLoading } from '../redux/actions/loadingAction'
 import { Buffer } from 'buffer';
-import { useBatteryLevel } from '../ble/BatteryLevel'
 import RNBluetoothClassic from 'react-native-bluetooth-classic';
 import { checkBondedClassicPeripheral } from '../ble/BLEManager'
 
@@ -34,16 +33,12 @@ declare module 'react-native-ble-manager' {
   }
 }
 
-const BleManagerModule = NativeModules.BleManager;
-const bleManagerEmitter = new NativeEventEmitter();
-
 const HomeScreen = ({ navigation }: any) => {
   const isFocused = useIsFocused()
   const theme = useTheme()
   const device = useAppSelector((state) => state.deviceConnectionReducer?.device)
   const [deviceLocalState, setDeviceLocalState] = useState(device)
   const dispacth = useDispatch()
-  const batteryLevel = useBatteryLevel(device.id ?? '');
 
   useEffect(() => {
     StatusBar.setTranslucent(true);
@@ -214,7 +209,8 @@ const HomeScreen = ({ navigation }: any) => {
 
           <TouchableOpacity
             style={[styles.PairingButton, {
-              marginTop: 10
+              marginTop: 10,
+              paddingVertical: 12,
             }]}
             onPress={() => {
               if (Object.keys(device).length > 0) {
@@ -226,8 +222,7 @@ const HomeScreen = ({ navigation }: any) => {
           >
             <LinearGradient
               style={[styles.PairingButton, {
-                paddingHorizontal: 25,
-                paddingVertical: 12
+                paddingVertical: 12,
               }]}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
@@ -244,7 +239,7 @@ const HomeScreen = ({ navigation }: any) => {
       {/* Check if Device is pairing */}
 
       {/* Main Menu */}
-      <SectionLayout style={{ marginTop: 20, alignItems: 'center' }} edges={['left', 'right']} horizontalPadding={19}>
+      <SectionLayout style={{ marginTop: 20, alignItems: 'center' }} edges={['left', 'right']}>
         <View style={{ flexDirection: 'row', width: '100%', gap: 20, flexWrap: 'wrap' }}>
           <TouchableOpacity
             style={styles.actionButton}
@@ -263,7 +258,7 @@ const HomeScreen = ({ navigation }: any) => {
               colors={[COLORS.secondary, COLORS.darkBlue]}
             >
               <MaterialDesignIcons name='microphone-variant' size={25} color={theme.colors.onPrimary} />
-              <Text style={{ marginLeft: 5, color: theme.colors.onPrimary, fontSize: 12 }}>Recording Audio</Text>
+              <Text style={{ marginLeft: 5, color: theme.colors.onPrimary, fontSize: 12, textAlign: 'center' }}>Record Audio</Text>
             </LinearGradient>
           </TouchableOpacity>
           <TouchableOpacity
@@ -283,7 +278,7 @@ const HomeScreen = ({ navigation }: any) => {
               colors={[COLORS.secondary, COLORS.darkBlue]}
             >
               <MaterialDesignIcons name='microphone-outline' size={25} color={theme.colors.onPrimary} />
-              <Text style={{ marginLeft: 5, color: theme.colors.onPrimary, fontSize: 12 }}>Voice-to-Text</Text>
+              <Text style={{ marginLeft: 5, color: theme.colors.onPrimary, fontSize: 12, textAlign: 'center' }}>Voice-to-Text</Text>
             </LinearGradient>
           </TouchableOpacity>
           <TouchableOpacity
@@ -303,7 +298,7 @@ const HomeScreen = ({ navigation }: any) => {
               colors={[COLORS.secondary, COLORS.darkBlue]}
             >
               <MaterialDesignIcons name='ear-hearing' size={25} color={theme.colors.onPrimary} />
-              <Text style={{ marginLeft: 5, color: theme.colors.onPrimary, fontSize: 12 }}>Live Translation</Text>
+              <Text style={{ marginLeft: 5, color: theme.colors.onPrimary, fontSize: 12, textAlign: 'center' }}>Live Translation</Text>
             </LinearGradient>
           </TouchableOpacity>
         </View>
@@ -313,7 +308,7 @@ const HomeScreen = ({ navigation }: any) => {
       <SectionLayout>
         <Surface style={{
           marginTop: 20,
-          width: '90%',
+          width: '100%',
           alignSelf: 'center',
           padding: 20,
           backgroundColor: COLORS.tertiary,
@@ -372,7 +367,7 @@ export default HomeScreen
 const styles = StyleSheet.create({
   statusContainer: {
     marginTop: 20,
-    width: '90%',
+    width: '100%',
     alignSelf: 'center',
     padding: 20,
     backgroundColor: COLORS.tertiary,
@@ -386,6 +381,7 @@ const styles = StyleSheet.create({
   glassesName: { fontSize: 18, fontWeight: 'bold', color: COLORS.white },
   PairingButton: {
     width: '100%',
+    height: 65,
     borderRadius: 15,
   },
   actionButton: {

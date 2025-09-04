@@ -26,7 +26,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     window = UIWindow(frame: UIScreen.main.bounds)
 
     factory.startReactNative(
-      withModuleName: "EchoLens",
+      withModuleName: "OptiLens",
       in: window,
       launchOptions: launchOptions
     )

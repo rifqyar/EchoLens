@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, StyleSheet, Image, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
+import { View, StyleSheet, Image, TouchableOpacity, ActivityIndicator, Alert, Platform } from 'react-native';
 import { Text, Card, Divider } from 'react-native-paper';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import LinearGradient from 'react-native-linear-gradient';
@@ -29,8 +29,10 @@ const ProfileScreen = ({ navigation }: ProfileScreenProps) => {
         console.log(jsonValue)
         if (jsonValue != null) {
           var userJson = JSON.parse(jsonValue)
-          userJson.name = userJson.name.split(" ");
-          userJson.name = userJson.name.reverse().join(" ")
+          if(Platform.OS === 'android'){
+            userJson.name = userJson.name.split(" ");
+            userJson.name = userJson.name.reverse().join(" ")
+          }
           setUser(userJson);
         }
       } catch (e) {
@@ -169,12 +171,12 @@ const styles = StyleSheet.create({
   },
   cardGradient: {
     borderRadius: 16,
-    padding: 20,
     alignItems: 'center',
     marginBottom: 45,
   },
   profileContainer: {
     alignItems: 'center',
+    paddingVertical: 20
   },
   avatarWrapper: {
     position: 'relative',
@@ -227,13 +229,12 @@ const styles = StyleSheet.create({
   menuCard: {
     borderRadius: 16,
     marginVertical: 8,
-    paddingVertical: 8,
-    paddingHorizontal: 12,
   },
   menuItem: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: 12,
+    paddingHorizontal: 20,
   },
   menuText: {
     flex: 1,

@@ -122,6 +122,7 @@ const SoundRecording: React.FC = ({ navigation }: any) => {
       <TouchableOpacity
         style={{
           marginRight: 10,
+          marginLeft: 'auto'
         }}
         onPress={() => {
           navigation.push('HistoryScreen')
@@ -135,7 +136,7 @@ const SoundRecording: React.FC = ({ navigation }: any) => {
 
   return (
     <>
-      <AppHeader withBack >
+      <AppHeader withBack title='Recording'>
         <HistoryButton />
       </AppHeader>
       <View style={styles.container}>

@@ -74,6 +74,7 @@ const RecordingsList: React.FC = () => {
   };
 
   const playAudio = (path: string) => {
+    console.log(path)
     const sound = new Sound(path, "", (err: any) => {
       if (err) {
         console.error("❌ Gagal play audio:", err);

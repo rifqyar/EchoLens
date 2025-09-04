@@ -24,7 +24,7 @@ const SupportDevices: React.FC = () => {
   return (
     <>
       <ScreenLayout withBackgroundImg>
-        <View style={{ flex: 1, padding: 20 }}>
+        <View style={{ flex: 1, padding: 10 }}>
           {/* Connection Status */}
           <SectionLayout>
             <Text style={{ fontSize: 18, fontWeight: 'bold', color: theme.colors.surface }}>

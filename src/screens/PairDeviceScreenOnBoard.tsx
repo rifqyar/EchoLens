@@ -1,4 +1,4 @@
-import { Image, StyleSheet, Text, View } from 'react-native'
+import { Image, Platform, StyleSheet, Text, View } from 'react-native'
 import React from 'react'
 import { AppHeader } from '../components/layout/AppHeader'
 import { ScreenLayout } from '../components/layout/ScreenLayout'
@@ -50,7 +50,11 @@ const PairDeviceScreenOnBoard = ({navigation} : any) => {
           <Button
             mode='contained'
             onPress={() => {
-              navigation.push('PairDeviceScreen')
+              if(Platform.OS == 'android'){
+                navigation.push('PairDeviceScreen')
+              } else if (Platform.OS == 'ios'){
+                navigation.push('ScanDeviceScreen')
+              }
             }}
             style={{ width: '100%', marginBottom: 35 }}
             labelStyle={{ fontSize: 16, color: '#FFF' }}

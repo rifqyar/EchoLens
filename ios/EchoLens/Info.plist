@@ -2,17 +2,6 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>CFBundleURLTypes</key>
-	<array>
-		<dict>
-			<key>CFBundleURLName</key>
-			<string>GoogleSignin</string>
-			<key>CFBundleURLSchemes</key>
-			<array>
-				<string>com.googleusercontent.apps.403993697553-h74ltao0vs725ah3sfhhr57bpn2jfqou</string>
-			</array>
-		</dict>
-	</array>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
@@ -31,6 +20,17 @@
 	<string>$(MARKETING_VERSION)</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>GoogleSignin</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>com.googleusercontent.apps.403993697553-hc584kmh0p120unvos7ggqgjks3kibq5</string>
+			</array>
+		</dict>
+	</array>
 	<key>CFBundleVersion</key>
 	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>LSRequiresIPhoneOS</key>
@@ -46,19 +46,27 @@
 	<string>OptiLens Need Bluetooth access to connect to Smart Glasses Devices.</string>
 	<key>NSBluetoothPeripheralUsageDescription</key>
 	<string>OptiLens use Bluetooth for comunicating with smart glasses.</string>
-	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>OptiLens need location access for finding nearby Devices</string>
-	<key>NSMicrophoneUsageDescription</key>
-	<string>OptiLens need Microphone access for audio recording.</string>
-	<key>NSLocalNetworkUsageDescription</key>
-	<string>OptiLens need local connection for connect to smart glasses</string>
 	<key>NSBonjourServices</key>
 	<array>
 		<string>_http._tcp</string>
 		<string>_https._tcp</string>
 	</array>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>OptiLens need local connection for connect to smart glasses</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>OptiLens need location access for finding nearby Devices</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>OptiLens need Microphone access for audio recording.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>This app requires access to your photo library to allow you to select profile pictures and documents.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>This app requires access to speech recognition to allow you to use voice commands.</string>
 	<key>RCTNewArchEnabled</key>
 	<true/>
+	<key>UIAppFonts</key>
+	<array>
+		<string>MaterialDesignIcons.ttf</string>
+	</array>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>bluetooth-central</string>
@@ -71,12 +79,18 @@
 	<array>
 		<string>arm64</string>
 	</array>
+	<key>UISupportedExternalAccessoryProtocols</key>
+	<array>
+		<string>com.optilens.bluetooth</string>
+	</array>
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>UIRequiresFullScreen</key>
+	<true/>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
 </dict>

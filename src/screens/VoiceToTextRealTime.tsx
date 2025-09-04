@@ -5,7 +5,7 @@ import { ScreenLayout } from '../components/layout/ScreenLayout'
 import { SectionLayout } from '../components/layout/SectionLayout'
 import SelectOptions, { Option } from '../components/common/SelectOptions'
 import { COLORS } from '../assets/theme'
-import { Button, Snackbar, Surface, Text } from 'react-native-paper'
+import { Button, Dialog, Portal, Snackbar, Surface, Text } from 'react-native-paper'
 import LinearGradient from 'react-native-linear-gradient'
 import { useIsFocused } from '@react-navigation/native'
 import AudioRecord from 'react-native-audio-record'
@@ -14,6 +14,8 @@ import { useAppSelector } from '../redux/store'
 import RNFS from 'react-native-fs';
 import LoadingScreen from '../components/common/LoadingScreen'
 import MaterialDesignIcons from '@react-native-vector-icons/material-design-icons'
+import { PickerIOS } from '@react-native-picker/picker'
+import { ItemValue } from '@react-native-picker/picker/typings/Picker'
 
 type Transcription = {
   original: string;
@@ -63,6 +65,9 @@ const VoiceToTextRealtime = ({ navigation }: any) => {
 
   const [textNotif, setTextNotif] = useState<string>('');
   const [statusVisible, setStatusVisible] = useState<boolean>(false)
+
+  const [pickerIOSIn, setPickerIOSIn] = useState(false)
+  const [pickerIOSOut, setPickerIOSOut] = useState(false)
 
   const onDismissNotifSave = () => setNotifSavedFile({
     visible: false,
@@ -242,7 +247,7 @@ const VoiceToTextRealtime = ({ navigation }: any) => {
             name: fileName,
           });
           formData.append("job_id", timestamp);
-  
+
           // const response = await fetch("http://172.20.10.2:4053/upload", {
           const response = await fetch("https://optilens.rekayasadigital.com/upload", {
             method: "POST",
@@ -251,7 +256,7 @@ const VoiceToTextRealtime = ({ navigation }: any) => {
             },
             body: formData,
           });
-  
+
           const result = await response.json();
           console.log("✅ Upload result:", result);
         } catch (uploadErr) {
@@ -279,7 +284,11 @@ const VoiceToTextRealtime = ({ navigation }: any) => {
       const langIn = selectedIn
       const langOut = selectedOut
 
-      const folderText = `${RNFS.ExternalStorageDirectoryPath}/Documents/OptiLens/Text`;
+      const basePath =
+        Platform.OS === 'android'
+          ? `${RNFS.ExternalStorageDirectoryPath}/Documents/OptiLens`
+          : `${RNFS.DocumentDirectoryPath}/OptiLens`;
+      const folderText = `${basePath}/Text`;
       const fileName = `recording-${selectedIn}-${id}.txt`;
       const destPath = `${folderText}/${fileName}`;
 
@@ -367,44 +376,100 @@ ${translated || "-"}
       </AppHeader>
       <ScreenLayout withBackgroundImg edges={['left', 'right']} style={{ marginHorizontal: 20 }}>
         {/* Header  */}
-        <SectionLayout style={styles.headerWrapper}>
-          <View style={styles.languageWrapper}>
-            <SelectOptions
-              label="Select Input Language"
-              options={optionsIn}
-              backgroundColor={COLORS.tertiary}
-              selectedValue={selectedIn}
-              onValueChange={setSelectedIn}
-            />
+        {/* <SectionLayout style={styles.headerWrapper}> */}
+        <View style={{
+          flex: 0.2,
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+        }}>
+          <View style={{ flex: 0.6 }}>
+            {
+              Platform.OS == 'android'
+                ?
+                <SelectOptions
+                  label=""
+                  options={optionsIn}
+                  backgroundColor={COLORS.tertiary}
+                  selectedValue={selectedIn}
+                  onValueChange={setSelectedIn}
+                />
+                :
+                <TouchableOpacity style={styles.container} onPress={() => setPickerIOSIn(true)}>
+                  <View
+                    style={[
+                      styles.pickerWrapper,
+                      {
+                        borderColor: COLORS.lightGrey,
+                      },
+                    ]}
+                  >
+                    <Text style={{ color: selectedIn == '' ? COLORS.Grey : COLORS.lightGrey }}>{selectedIn != '' ? (
+                      <>
+                        {optionsIn.filter((options) => options.value == selectedIn).map((selected) => selected.label)}
+                      </>
+                    ) : 'Select Input Language'}</Text>
+                  </View>
+                </TouchableOpacity>
+            }
           </View>
-
-          <TouchableOpacity
-            style={[styles.listeningButton, {
-              marginTop: 10
-            }]}
-            onPress={() => {
-              if (!listening) {
-                startRecording()
-              } else {
-                stopRecording()
-              }
-            }}
-          >
-            <LinearGradient
+          <View style={{ flex: 0.7 }}>
+            <TouchableOpacity
               style={[styles.listeningButton, {
-                paddingHorizontal: 25,
-                paddingVertical: 12
+                marginTop: 10,
+                paddingHorizontal: 20
               }]}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              colors={[COLORS.secondary, COLORS.Indigo]}
+              onPress={() => {
+                if (!listening) {
+                  startRecording()
+                } else {
+                  stopRecording()
+                }
+              }}
             >
-              <Text style={{ textAlign: 'center', fontSize: 14, fontWeight: 'bold', color: COLORS.white }}>
-                {listening ? 'Stop Listening' : 'Start Listening'}
-              </Text>
-            </LinearGradient>
-          </TouchableOpacity>
-        </SectionLayout>
+              <LinearGradient
+                style={[styles.listeningButton, {
+                  paddingVertical: 12
+                }]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                colors={[COLORS.secondary, COLORS.Indigo]}
+              >
+                <Text style={{ textAlign: 'center', fontSize: 14, fontWeight: 'bold', color: COLORS.white }}>
+                  {listening ? 'Stop Listening' : 'Start Listening'}
+                </Text>
+              </LinearGradient>
+            </TouchableOpacity>
+          </View>
+        </View>
+        {/* 
+        <TouchableOpacity
+          style={[styles.listeningButton, {
+            marginTop: 10
+          }]}
+          onPress={() => {
+            if (!listening) {
+              startRecording()
+            } else {
+              stopRecording()
+            }
+          }}
+        >
+          <LinearGradient
+            style={[styles.listeningButton, {
+              paddingHorizontal: 25,
+              paddingVertical: 12
+            }]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            colors={[COLORS.secondary, COLORS.Indigo]}
+          >
+            <Text style={{ textAlign: 'center', fontSize: 14, fontWeight: 'bold', color: COLORS.white }}>
+              {listening ? 'Stop Listening' : 'Start Listening'}
+            </Text>
+          </LinearGradient>
+        </TouchableOpacity> */}
+        {/* </SectionLayout> */}
 
         {/* Original Text Wrapper */}
         <LinearGradient
@@ -439,13 +504,34 @@ ${translated || "-"}
         {/* Footer */}
         <SectionLayout style={styles.footerWrapper}>
           <View style={styles.languageWrapper}>
-            <SelectOptions
-              label="Select Input Language"
-              options={optionsOut}
-              backgroundColor={COLORS.tertiary}
-              selectedValue={selectedOut}
-              onValueChange={setSelectedOut}
-            />
+            {
+              Platform.OS == 'android'
+                ?
+                <SelectOptions
+                  label=""
+                  options={optionsOut}
+                  backgroundColor={COLORS.tertiary}
+                  selectedValue={selectedOut}
+                  onValueChange={setSelectedOut}
+                />
+                :
+                <TouchableOpacity style={styles.container} onPress={() => setPickerIOSOut(true)}>
+                  <View
+                    style={[
+                      styles.pickerWrapper,
+                      {
+                        borderColor: COLORS.lightGrey,
+                      },
+                    ]}
+                  >
+                    <Text style={{ color: selectedOut == '' ? COLORS.Grey : COLORS.lightGrey }}>{selectedOut != '' ? (
+                      <>
+                        {optionsOut.filter((options) => options.value == selectedOut).map((selected) => selected.label)}
+                      </>
+                    ) : 'Select Output Language'}</Text>
+                  </View>
+                </TouchableOpacity>
+            }
           </View>
         </SectionLayout>
       </ScreenLayout>
@@ -494,6 +580,51 @@ ${translated || "-"}
         }}>
         {notifSaved.text ?? ''}
       </Snackbar>
+
+      <Portal>
+        <Dialog visible={pickerIOSIn}>
+          <Dialog.Title>Select Input Language</Dialog.Title>
+          <Dialog.Content>
+            <PickerIOS
+              selectedValue={selectedIn}
+              onValueChange={(itemValue: ItemValue) => {
+                if (typeof itemValue === "string") {
+                  setSelectedIn(itemValue);
+                  setPickerIOSIn(false)
+                }
+              }}
+            >
+              {optionsIn.map((option) => (
+                <PickerIOS.Item key={option.value} value={option.value} label={option.label} />
+              ))}
+            </PickerIOS>
+          </Dialog.Content>
+          <Dialog.Actions>
+            <Button onPress={() => setPickerIOSIn(false)}>Cancel</Button>
+          </Dialog.Actions>
+        </Dialog>
+        <Dialog visible={pickerIOSOut}>
+          <Dialog.Title>Select Output Language</Dialog.Title>
+          <Dialog.Content>
+            <PickerIOS
+              selectedValue={selectedOut}
+              onValueChange={(itemValue: ItemValue) => {
+                if (typeof itemValue === "string") {
+                  setSelectedOut(itemValue);
+                  setPickerIOSOut(false)
+                }
+              }}
+            >
+              {optionsOut.map((option) => (
+                <PickerIOS.Item key={option.value} value={option.value} label={option.label} />
+              ))}
+            </PickerIOS>
+          </Dialog.Content>
+          <Dialog.Actions>
+            <Button onPress={() => setPickerIOSOut(false)}>Cancel</Button>
+          </Dialog.Actions>
+        </Dialog>
+      </Portal>
     </>
   )
 }
@@ -501,6 +632,18 @@ ${translated || "-"}
 export default VoiceToTextRealtime
 
 const styles = StyleSheet.create({
+  container: {
+    height: 30,
+  },
+  pickerWrapper: {
+    height: 42,
+    borderWidth: 1, // border 2px
+    borderRadius: 12, // rounded corner
+    overflow: "hidden",
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: COLORS.tertiary
+  },
   headerWrapper: {
     flex: 1,
     flexDirection: 'row',
@@ -518,6 +661,7 @@ const styles = StyleSheet.create({
   },
   listeningButton: {
     width: 'auto',
+    height: 65,
     borderRadius: 15,
   },
   outputOuterWrapper: {

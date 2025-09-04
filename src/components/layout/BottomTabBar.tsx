@@ -11,7 +11,7 @@ import SupportDevices from '../../screens/SupportDevices'
 const Tab = createBottomTabNavigator()
 
 const CustomHeader = () => (
-  <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: "space-between", width: '100%' }}>
+  <View style={{ flexDirection: 'row', alignItems: 'flex-start', justifyContent: "space-between", width: '100%' }}>
     <View>
       <Image
         source={require('../../assets/img/logo-full.png')}
@@ -69,6 +69,7 @@ export default function BottomTabBar() {
         // headerShown:route.name != 'Home' ? false : true,
         headerShown:true,
         headerTitle: () => <CustomHeader />,
+        headerTitleAlign: 'left',
         headerStyle: {
           backgroundColor: COLORS.background
         },

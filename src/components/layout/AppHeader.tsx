@@ -34,7 +34,7 @@ export const AppHeader = (props: AppHeaderProps) => {
           }
         />
       )}
-      {props.title && <Appbar.Content color={theme.colors.onSecondary} title={props.title} titleStyle={{fontSize: 16, marginLeft: -10}} />}
+      {props.title && <Appbar.Content color={theme.colors.onSecondary} style={{alignItems: 'flex-start'}} title={props.title} titleStyle={{fontSize: 16, textAlign: 'left'}} />}
       {props.children}
     </Appbar.Header>
   );
