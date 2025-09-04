@@ -3,9 +3,9 @@
 <plist version="1.0">
 <dict>
 	<key>CLIENT_ID</key>
-	<string>403993697553-h74ltao0vs725ah3sfhhr57bpn2jfqou.apps.googleusercontent.com</string>
+	<string>403993697553-hc584kmh0p120unvos7ggqgjks3kibq5.apps.googleusercontent.com</string>
 	<key>REVERSED_CLIENT_ID</key>
-	<string>com.googleusercontent.apps.403993697553-h74ltao0vs725ah3sfhhr57bpn2jfqou</string>
+	<string>com.googleusercontent.apps.403993697553-hc584kmh0p120unvos7ggqgjks3kibq5</string>
 	<key>ANDROID_CLIENT_ID</key>
 	<string>403993697553-2h6t33lpu6nggn376fr2mjcltv4da8g9.apps.googleusercontent.com</string>
 	<key>API_KEY</key>
@@ -15,7 +15,7 @@
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>com.optilens</string>
+	<string>com.optilens.app</string>
 	<key>PROJECT_ID</key>
 	<string>optilens-df30d</string>
 	<key>STORAGE_BUCKET</key>
@@ -31,6 +31,6 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:403993697553:ios:5c4c4b42876d34460800b0</string>
+	<string>1:403993697553:ios:0196b171c5a82a950800b0</string>
 </dict>
 </plist>
