@@ -125,12 +125,13 @@ const ScanDevicesScreen = () => {
       peripheral.name = 'NO NAME';
     }
 
+    // Mac Address 41:42:FF:8E:79:9D
     setPeripherals((map) => {
       console.info('Loop Data Peripheral', peripheral);
       if (
-        peripheral.name?.includes('G300') ||
-        peripheral.name?.includes('FD8C') ||
-        peripheral.name?.includes('G300_FD8C')
+        // peripheral.name?.includes('MO1') ||
+        // peripheral.name?.includes('MO1') ||
+        peripheral.name?.includes('MO1') || peripheral.id == '41:42:FF:8E:79:9D'
       ) {
         const newMap = new Map(map);
         newMap.set(peripheral.id, peripheral);
@@ -249,7 +250,7 @@ const ScanDevicesScreen = () => {
         dispacth(notLoading())
         let payloadState = peripheral
         payloadState.isBLE = true
-        
+
         dispacth({
           type: 'CONNECT_DEVICE',
           payload: payloadState
@@ -533,8 +534,8 @@ const ScanDevicesScreen = () => {
           <></>
         )
         }
-        {isLoading ? <LoadingScreen /> : <></>}
       </ScreenLayout>
+      {isLoading ? <LoadingScreen /> : <></>}
     </>
   );
 };

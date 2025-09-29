@@ -51,6 +51,7 @@ const PairDeviceScreenOnBoard = ({navigation} : any) => {
             mode='contained'
             onPress={() => {
               if(Platform.OS == 'android'){
+                // navigation.push('ScanDeviceScreen')
                 navigation.push('PairDeviceScreen')
               } else if (Platform.OS == 'ios'){
                 navigation.push('ScanDeviceScreen')

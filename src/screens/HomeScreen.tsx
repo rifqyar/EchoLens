@@ -1,4 +1,4 @@
-import { Image, StatusBar, StyleSheet, Text, View, NativeEventEmitter, NativeModules, DeviceEventEmitter, TouchableOpacity, BackHandler, Alert } from 'react-native'
+import { Image, StatusBar, StyleSheet, Text, View, NativeEventEmitter, NativeModules, DeviceEventEmitter, TouchableOpacity, BackHandler, Alert, Platform } from 'react-native'
 import React, { useCallback, useEffect, useState } from 'react'
 import { useIsFocused, useNavigation, NavigationProp, useFocusEffect } from '@react-navigation/native'
 import { Button, Surface, useTheme } from 'react-native-paper'
@@ -381,7 +381,7 @@ const styles = StyleSheet.create({
   glassesName: { fontSize: 18, fontWeight: 'bold', color: COLORS.white },
   PairingButton: {
     width: '100%',
-    height: 65,
+    height: Platform.OS == 'ios' ? 65 : 'auto',
     borderRadius: 15,
   },
   actionButton: {

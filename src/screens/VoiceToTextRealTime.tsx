@@ -661,7 +661,7 @@ const styles = StyleSheet.create({
   },
   listeningButton: {
     width: 'auto',
-    height: 65,
+    height: Platform.OS == 'ios' ? 65 : 'auto',
     borderRadius: 15,
   },
   outputOuterWrapper: {
