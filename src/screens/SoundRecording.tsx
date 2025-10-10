@@ -78,14 +78,14 @@ const SoundRecording: React.FC = ({ navigation }: any) => {
     }).start();
     const filePath = await AudioRecord.stop();
 
-    // === Simpan ke folder Documents/OptiLens ===
+    // === Simpan ke folder Documents/TactID ===
     try {
       const timestamp = Date.now();
       const fileName = `recording-${timestamp}.wav`;
       const basePath =
         Platform.OS === 'android'
-          ? `${RNFS.ExternalStorageDirectoryPath}/Documents/OptiLens`
-          : `${RNFS.DocumentDirectoryPath}/OptiLens`;
+          ? `${RNFS.ExternalStorageDirectoryPath}/Documents/TactID`
+          : `${RNFS.DocumentDirectoryPath}/TactID`;
 
       const folderPath = `${basePath}/Audio`;
       const folderText = `${basePath}/Text`;

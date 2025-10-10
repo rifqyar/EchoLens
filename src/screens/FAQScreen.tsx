@@ -16,9 +16,9 @@ const FAQScreen = () => {
     <>
       <AppHeader withBack title='FAQ' />
       <ScreenLayout withBackgroundImg>
-        <List.Section title="FAQ - OptiLens" titleStyle={{ color: COLORS.white }}>
+        <List.Section title="FAQ - Tact-ID" titleStyle={{ color: COLORS.white }}>
           <List.Accordion
-            title="What is the OptiLens?"
+            title="What is the Tact-ID?"
             titleStyle={{
               color: COLORS.white
             }}
@@ -29,6 +29,7 @@ const FAQScreen = () => {
           >
             <List.Item title="This app connects with SmartGlasses to display notifications, data, and assist with hands-free operations."
               titleStyle={{ color: COLORS.white }}
+              titleNumberOfLines={3}
             />
           </List.Accordion>
           <Divider />

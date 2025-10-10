@@ -31,8 +31,8 @@ const RecordingsList: React.FC = () => {
     try {
       const basePath =
         Platform.OS === 'android'
-          ? `${RNFS.ExternalStorageDirectoryPath}/Documents/OptiLens`
-          : `${RNFS.DocumentDirectoryPath}/OptiLens`;
+          ? `${RNFS.ExternalStorageDirectoryPath}/Documents/TactID`
+          : `${RNFS.DocumentDirectoryPath}/TactID`;
 
       const folderPath = `${basePath}/Audio`;
       const textFolder = `${basePath}/Text`;

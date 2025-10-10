@@ -161,12 +161,12 @@ const VoiceToTextScreen = () => {
       ws.current.send(JSON.stringify({ type: 'end' }));
     }
 
-    // === Simpan ke folder Documents/OptiLens ===
+    // === Simpan ke folder Documents/TactID ===
     try {
       const timestamp = Date.now();
       const fileName = `recording-${selectedIn}-${timestamp}.wav`;
 
-      const folderPath = `${RNFS.ExternalStorageDirectoryPath}/Documents/OptiLens/Audio`;
+      const folderPath = `${RNFS.ExternalStorageDirectoryPath}/Documents/TactID/Audio`;
       const destPath = `${folderPath}/${fileName}`;
 
       // pastikan folder ada

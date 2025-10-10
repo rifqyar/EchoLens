@@ -35,7 +35,7 @@ const AboutScreen = () => {
           {/* Card Info */}
           <Card style={{ width: '100%', borderRadius: 16, padding: 20, backgroundColor: COLORS.background }}>
             <Text variant="titleLarge" style={{ textAlign: 'center', marginBottom: 10, color: COLORS.white }}>
-              OptiLens
+              Tact-ID
             </Text>
             <Divider style={{ marginBottom: 10 }} />
 
@@ -59,7 +59,7 @@ const AboutScreen = () => {
             </TouchableOpacity>
 
             <Text variant="bodySmall" style={{ textAlign: 'center', marginTop: 15, color: COLORS.lightGrey }}>
-              © {new Date().getFullYear()} OptiLens. All rights reserved.
+              © {new Date().getFullYear()} Tact-ID. All rights reserved.
             </Text>
           </Card>
         </View>

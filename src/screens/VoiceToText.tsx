@@ -174,14 +174,14 @@ const VoiceToTextScreen = ({ navigation }: any) => {
     console.log('⏹️ Stop Recording...');
     const filePath = await AudioRecord.stop();
 
-    // === Simpan ke folder Documents/OptiLens ===
+    // === Simpan ke folder Documents/TactID ===
     try {
       const timestamp = Date.now();
       const fileName = `recording-${selectedIn}-${timestamp}.wav`;
       const basePath =
         Platform.OS === 'android'
-          ? `${RNFS.ExternalStorageDirectoryPath}/Documents/OptiLens`
-          : `${RNFS.DocumentDirectoryPath}/OptiLens`;
+          ? `${RNFS.ExternalStorageDirectoryPath}/Documents/TactID`
+          : `${RNFS.DocumentDirectoryPath}/TactID`;
 
       const folderPath = `${basePath}/Audio`;
       const folderText = `${basePath}/Text`;
@@ -263,8 +263,8 @@ const VoiceToTextScreen = ({ navigation }: any) => {
 
       const basePath =
         Platform.OS === 'android'
-          ? `${RNFS.ExternalStorageDirectoryPath}/Documents/OptiLens`
-          : `${RNFS.DocumentDirectoryPath}/OptiLens`;
+          ? `${RNFS.ExternalStorageDirectoryPath}/Documents/TactID`
+          : `${RNFS.DocumentDirectoryPath}/TactID`;
       const folderText = `${basePath}/Text`;
       const fileName = `recording-${selectedIn}-${id}.txt`;
       const destPath = `${folderText}/${fileName}`;
