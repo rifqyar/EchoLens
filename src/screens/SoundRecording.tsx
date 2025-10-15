@@ -6,6 +6,7 @@ import { Buffer } from 'buffer';
 import { AppHeader } from '../components/layout/AppHeader';
 import RNFS from 'react-native-fs';
 import { COLORS } from '../assets/theme';
+import BluetoothSco from '../ble/BluetoothSco';
 
 type NotifState = {
   visible: boolean,
@@ -30,6 +31,11 @@ const SoundRecording: React.FC = ({ navigation }: any) => {
   const startTimeRef = useRef<number>(0);
 
   const startRecording = async () => {
+    const startSco = async () => {
+      BluetoothSco.startSco(); // aktifkan mic Bluetooth
+    }
+
+    await startSco()
     setRecording(true);
     startTimeRef.current = Date.now();
 
@@ -69,6 +75,8 @@ const SoundRecording: React.FC = ({ navigation }: any) => {
   };
 
   const stopRecording = async () => {
+    BluetoothSco.stopSco()
+    
     setRecording(false);
     if (intervalRef.current !== null) clearInterval(intervalRef.current);
     setRecordTime('00:00');

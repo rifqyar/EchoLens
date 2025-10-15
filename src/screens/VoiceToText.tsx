@@ -14,6 +14,7 @@ import LoadingScreen from '../components/common/LoadingScreen'
 import MaterialDesignIcons from '@react-native-vector-icons/material-design-icons'
 import { PickerIOS } from '@react-native-picker/picker'
 import { ItemValue } from '@react-native-picker/picker/typings/Picker'
+import BluetoothSco from '../ble/BluetoothSco'
 
 type Transcription = {
   original: string;
@@ -151,7 +152,12 @@ const VoiceToTextScreen = ({ navigation }: any) => {
   // Start Recording
   // ====================== 
   const startRecording = async () => {
+    const startSco = async () => {
+      BluetoothSco.startSco(); // aktifkan mic Bluetooth
+    }
+
     if (selectedIn != '' && selectedOut != '') {
+      await startSco()
       setPartialOriginal('')
       setPartialTranslated('')
 
@@ -171,6 +177,7 @@ const VoiceToTextScreen = ({ navigation }: any) => {
   };
 
   const stopRecording = async () => {
+    BluetoothSco.stopSco()
     console.log('⏹️ Stop Recording...');
     const filePath = await AudioRecord.stop();
 
@@ -238,6 +245,7 @@ const VoiceToTextScreen = ({ navigation }: any) => {
           const result = await response.json();
           console.log("✅ Upload result:", result);
         } catch (uploadErr) {
+          setStatusVisible(false)
           console.error('❌ Upload gagal:', uploadErr);
           setNotifSavedFile({
             visible: true,

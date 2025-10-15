@@ -260,6 +260,7 @@ const VoiceToTextRealtime = ({ navigation }: any) => {
           const result = await response.json();
           console.log("✅ Upload result:", result);
         } catch (uploadErr) {
+          setStatusVisible(false)
           console.error('❌ Upload gagal:', uploadErr);
           setNotifSavedFile({
             visible: true,
