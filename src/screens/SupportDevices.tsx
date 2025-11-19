@@ -34,7 +34,15 @@ const SupportDevices: React.FC = () => {
               <View style={styles.glassesContainer}>
                 <Image source={require('../assets/img/logo-alt.png')} style={styles.glassesImage} />
                 <Text style={styles.glassesName}>
-                  MO1
+                  Sentinel
+                </Text>
+              </View>
+            </Surface>
+            <Surface style={styles.statusContainer}>
+              <View style={styles.glassesContainer}>
+                <Image source={require('../assets/img/logo-alt.png')} style={styles.glassesImage} />
+                <Text style={styles.glassesName}>
+                  Spectra
                 </Text>
               </View>
             </Surface>
