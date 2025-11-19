@@ -113,6 +113,11 @@ const HomeScreen = ({ navigation }: any) => {
       })
     } else {
       await BleManager.disconnect(device.id);
+      setDeviceLocalState({})
+      dispacth({
+        type: 'DISCONNET_DEVICE',
+        payload: {}
+      })
     }
   }
 
@@ -261,7 +266,7 @@ const HomeScreen = ({ navigation }: any) => {
               <Text style={{ marginLeft: 5, color: theme.colors.onPrimary, fontSize: 12, textAlign: 'center' }}>Record Audio</Text>
             </LinearGradient>
           </TouchableOpacity>
-          <TouchableOpacity
+          {/* <TouchableOpacity
             style={styles.actionButton}
             onPress={() => {
               navigation.push('VoiceToTextScreen')
@@ -280,7 +285,7 @@ const HomeScreen = ({ navigation }: any) => {
               <MaterialDesignIcons name='microphone-outline' size={25} color={theme.colors.onPrimary} />
               <Text style={{ marginLeft: 5, color: theme.colors.onPrimary, fontSize: 12, textAlign: 'center' }}>Voice-to-Text</Text>
             </LinearGradient>
-          </TouchableOpacity>
+          </TouchableOpacity> */}
           <TouchableOpacity
             style={styles.actionButton}
             onPress={() => {

@@ -131,7 +131,7 @@ const ScanDevicesScreen = () => {
       if (
         // peripheral.name?.includes('MO1') ||
         // peripheral.name?.includes('MO1') ||
-        peripheral.name?.includes('MO1') || peripheral.id == '41:42:FF:8E:79:9D'
+        peripheral.name?.includes('Bluetrum') || peripheral.id == '41:42:E7:76:55:7C'
       ) {
         const newMap = new Map(map);
         newMap.set(peripheral.id, peripheral);
@@ -176,7 +176,10 @@ const ScanDevicesScreen = () => {
         });
 
         await BleManager.connect(peripheral.id);
-        await connectToBluetoothClassic(peripheral.id);
+        if(Platform.OS == 'android'){
+          await initStartScan(peripheral.id, peripheral.name);
+        }
+
         console.log(`[connectPeripheral][${peripheral.id}] connected.`);
 
         setPeripherals((map) => {
@@ -267,6 +270,50 @@ const ScanDevicesScreen = () => {
       );
     }
   };
+
+  const initStartScan = async (peripheralId: string, peripheralName: any) => {
+    const result = await scanBluetoothClassic()
+    const prefix = peripheralId.split(":").slice(0, 5).join(":");
+
+    const targets = result.filter((d) =>
+      d.address.includes(prefix) &&
+      d.name !== peripheralName
+    )
+    console.log(targets)
+
+    if (targets.length > 0) {
+      await connectToBluetoothClassic(targets[0].address)
+
+      let newDevice = {
+        name: targets[0].name,
+        id: targets[0].id,
+        connected: true,
+        isBLE: false
+      };
+
+      let oldData = await AsyncStorage.getItem('deviceConnect');
+      let devices = [];
+
+      if (oldData) {
+        try {
+          devices = JSON.parse(oldData);
+        } catch (err) {
+          console.log('Parsing error:', err);
+          devices = [];
+        }
+      }
+
+      devices.push(newDevice);
+
+      await AsyncStorage.setItem('deviceConnect', JSON.stringify(devices));
+
+      dispacth({
+        type: 'CONNECT_DEVICE',
+        payload: devices
+      });
+
+    }
+  }
 
   function sleep(ms: number) {
     return new Promise<void>((resolve) => setTimeout(resolve, ms));
