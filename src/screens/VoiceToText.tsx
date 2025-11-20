@@ -15,6 +15,7 @@ import MaterialDesignIcons from '@react-native-vector-icons/material-design-icon
 import { PickerIOS } from '@react-native-picker/picker'
 import { ItemValue } from '@react-native-picker/picker/typings/Picker'
 import BluetoothSco from '../ble/BluetoothSco'
+import Tts from "react-native-tts";
 
 type Transcription = {
   original: string;
@@ -41,6 +42,13 @@ type NotifState = {
   visible: boolean,
   text: string
 }
+
+const TTS_LANG_MAP: Record<string, string> = {
+  id: "id-ID",
+  en: "en-US",
+  "zh-CN": "zh-CN",
+  "zh-TW": "zh-TW",
+};
 
 const VoiceToTextScreen = ({ navigation }: any) => {
   const [selectedIn, setSelectedIn] = useState<string>("");
@@ -128,6 +136,7 @@ const VoiceToTextScreen = ({ navigation }: any) => {
                 text: "📝 Transcript saved to: " + textPath,
               });
             }
+            speakText(msg.translated_text)
             setTextNotif('')
             break;
 
@@ -301,6 +310,22 @@ ${translated || "-"}
     } catch (err) {
       console.error("❌ Gagal simpan transcript:", err);
       return undefined;
+    }
+  };
+
+  const speakText = async (text: string) => {
+    try {
+      const lang = selectedOut || "en"; // default fallback ke English
+      const ttsLang = TTS_LANG_MAP[lang] ?? "en-US";
+
+      // Set bahasa sebelum speak
+      await Tts.setDefaultLanguage(ttsLang);
+      console.log("🎤 TTS Speaking in:", ttsLang);
+
+      await Tts.stop();
+      await Tts.speak(text);
+    } catch (err) {
+      console.error("TTS Error:", err);
     }
   };
 

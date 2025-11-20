@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, FlatList, ScrollView, StyleSheet, Platform } from "react-native";
+import { View, FlatList, ScrollView, StyleSheet, Platform, TouchableOpacity } from "react-native";
 import RNFS from "react-native-fs";
 import Sound from "react-native-sound";
 import {
@@ -18,10 +18,21 @@ interface RecordingItem {
   date: string;
 }
 
+interface SelectedItem {
+  audioPath: string;
+  txtPath: string;
+}
+
 const RecordingsList: React.FC = () => {
   const [recordings, setRecordings] = useState<RecordingItem[]>([]);
   const [selected, setSelected] = useState<RecordingItem | null>(null);
   const [transcript, setTranscript] = useState<string>("");
+  const [audioPlayed, setAudioPlayed] = useState(false);
+  const [isPlaying, setIsPlaying] = useState<boolean>(false);
+  const [currentSound, setCurrentSound] = useState<Sound | null>(null);
+
+  const [selectedItems, setSelectedItems] = useState<SelectedItem[]>([]);
+  const [selectMode, setSelectMode] = useState<boolean>(false);
 
   useEffect(() => {
     loadRecordings();
@@ -61,6 +72,23 @@ const RecordingsList: React.FC = () => {
     }
   };
 
+  const onPressItem = (item: RecordingItem) => {
+    if (!selectMode) {
+      openDetail(item);
+      return;
+    }
+
+    setSelectedItems(prev => {
+      const exists = prev.some(i => i.audioPath === item.audioPath);
+
+      if (exists) {
+        return prev.filter(i => i.audioPath !== item.audioPath);
+      } else {
+        return [...prev, { audioPath: item.audioPath, txtPath: item.txtPath }];
+      }
+    });
+  };
+
   const openDetail = async (item: RecordingItem) => {
     try {
       const txt = await RNFS.readFile(item.txtPath, "utf8");
@@ -73,22 +101,116 @@ const RecordingsList: React.FC = () => {
     }
   };
 
+  // const playAudio = (path: string) => {
+  //   console.log(path)
+  //   const sound = new Sound(path, "", (err: any) => {
+  //     if (err) {
+  //       console.error("❌ Gagal play audio:", err);
+  //       return;
+  //     }
+  //     sound.play(() => {
+  //       sound.release();
+  //     });
+  //   });
+  // };
+
   const playAudio = (path: string) => {
-    console.log(path)
+    // Jika sedang playing → stop
+    if (isPlaying && currentSound) {
+      currentSound.stop(() => {
+        currentSound.release();
+        setIsPlaying(false);
+        setCurrentSound(null);
+      });
+      return;
+    }
+
+    // Jika belum playing → play
     const sound = new Sound(path, "", (err: any) => {
       if (err) {
         console.error("❌ Gagal play audio:", err);
         return;
       }
+
+      setCurrentSound(sound);
+      setIsPlaying(true);
+
       sound.play(() => {
         sound.release();
+        setIsPlaying(false);      // 👉 otomatis kembali ke tombol Play
+        setCurrentSound(null);
       });
     });
   };
 
+  const onLongPressItem = (item: RecordingItem) => {
+    setSelectMode(true);
+    setSelectedItems(prev => {
+      const exists = prev.some(i => i.audioPath === item.audioPath);
+      if (exists) return prev;
+
+      return [...prev, { audioPath: item.audioPath, txtPath: item.txtPath }];
+    });
+  };
+
+  const deleteSelected = async () => {
+    try {
+      for (const item of selectedItems) {
+        if (await RNFS.exists(item.audioPath)) {
+          await RNFS.unlink(item.audioPath);
+        }
+        if (await RNFS.exists(item.txtPath)) {
+          await RNFS.unlink(item.txtPath);
+        }
+      }
+      setRecordings(prev =>
+        prev.filter(r => !selectedItems.some(i => i.audioPath === r.audioPath))
+      );
+      setSelectedItems([]);
+      setSelectMode(false);
+    } catch (err) {
+      console.error("❌ gagal hapus", err);
+    }
+  };
+
   return (
     <View style={styles.container}>
+      {selectMode && (
+        <Button
+          mode="contained"
+          style={{ backgroundColor: "red", marginBottom: 10 }}
+          onPress={deleteSelected}
+        >
+          Delete {selectedItems.length} Selected
+        </Button>
+      )}
+
       <FlatList
+        data={recordings}
+        keyExtractor={(item) => item.audioPath}
+        renderItem={({ item }) => {
+          const isSelected = selectedItems.some(i => i.audioPath === item.audioPath)
+
+          return (
+            <Card
+              style={[
+                styles.card,
+                isSelected ? { backgroundColor: "#3c4a63" } : {},
+              ]}
+              mode="outlined"
+              onPress={() => onPressItem(item)}
+              onLongPress={() => onLongPressItem(item)}
+            >
+              <Card.Content>
+                <Text style={styles.fileName}>{item.fileName}</Text>
+                <Text style={styles.date}>{item.date}</Text>
+              </Card.Content>
+            </Card>
+          );
+        }}
+      />
+
+      {/* <FlatList
         data={recordings}
         keyExtractor={(item) => item.audioPath}
         renderItem={({ item }) => (
@@ -103,7 +225,7 @@ const RecordingsList: React.FC = () => {
             </Card.Content>
           </Card>
         )}
-      />
+      /> */}
 
       {/* Modal Detail */}
       <Portal>
@@ -119,18 +241,37 @@ const RecordingsList: React.FC = () => {
             <Text style={styles.text}>{transcript}</Text>
           </ScrollView>
 
-          <Button
+          {/* <Button
             mode="contained"
             style={styles.playButton}
             onPress={() => selected && playAudio(selected.audioPath)}
           >
             ▶️ Play Audio
+          </Button> */}
+          <Button
+            mode="contained"
+            style={[
+              styles.playButton,
+              isPlaying ? { backgroundColor: "red" } : {},
+            ]}
+            onPress={() => selected && playAudio(selected.audioPath)}
+          >
+            {isPlaying ? "⛔ Stop Audio" : "▶️ Play Audio"}
           </Button>
 
           <Button
             mode="outlined"
             style={styles.closeButton}
-            onPress={() => setSelected(null)}
+            onPress={() => {
+              if (currentSound) {
+                currentSound.stop(() => {
+                  currentSound.release();
+                  setCurrentSound(null);
+                  setIsPlaying(false);
+                });
+              }
+              setSelected(null)
+            }}
             textColor="#fff"
           >
             ❌ Close
@@ -142,6 +283,17 @@ const RecordingsList: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
+  deleteContainer: {
+    backgroundColor: "red",
+    justifyContent: "center",
+    alignItems: "flex-end",
+    paddingHorizontal: 20,
+    marginVertical: 5,
+  },
+  deleteText: {
+    color: "white",
+    fontWeight: "bold",
+  },
   container: {
     backgroundColor: 'transparent',
     padding: 12,
