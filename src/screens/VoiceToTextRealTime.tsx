@@ -16,6 +16,7 @@ import LoadingScreen from '../components/common/LoadingScreen'
 import MaterialDesignIcons from '@react-native-vector-icons/material-design-icons'
 import { PickerIOS } from '@react-native-picker/picker'
 import { ItemValue } from '@react-native-picker/picker/typings/Picker'
+import Tts from "react-native-tts";
 
 type Transcription = {
   original: string;
@@ -37,6 +38,13 @@ const optionsOut: Option[] = [
   { label: "Chinese (Simplified)", value: "zh-CN" },
   { label: "Chinese (Traditional)", value: "zh-TW" },
 ];
+
+const TTS_LANG_MAP: Record<string, string> = {
+  id: "id-ID",
+  en: "en-US",
+  "zh-CN": "zh-CN",
+  "zh-TW": "zh-TW",
+};
 
 type NotifState = {
   visible: boolean,
@@ -140,6 +148,7 @@ const VoiceToTextRealtime = ({ navigation }: any) => {
                 text: "📝 Transcript saved to: " + textPath,
               });
             }
+            speakText(msg.translated_text)
             setTextNotif('')
             break;
 
@@ -323,6 +332,22 @@ ${translated || "-"}
   const checkConnectedPeripheral = async () => {
     if (Object.keys(device).length > 0) return true
   }
+
+  const speakText = async (text: string) => {
+    try {
+      const lang = selectedOut || "en"; // default fallback ke English
+      const ttsLang = TTS_LANG_MAP[lang] ?? "en-US";
+
+      // Set bahasa sebelum speak
+      await Tts.setDefaultLanguage(ttsLang);
+      console.log("🎤 TTS Speaking in:", ttsLang);
+
+      await Tts.stop();
+      await Tts.speak(text);
+    } catch (err) {
+      console.error("TTS Error:", err);
+    }
+  };
 
   async function requestAudioPermissions() {
     if (Platform.OS === "android") {
