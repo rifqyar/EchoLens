@@ -148,7 +148,7 @@ const VoiceToTextRealtime = ({ navigation }: any) => {
                 text: "📝 Transcript saved to: " + textPath,
               });
             }
-            speakText(msg.translated_text)
+            // speakText(msg.translated_text)
             setTextNotif('')
             break;
 
