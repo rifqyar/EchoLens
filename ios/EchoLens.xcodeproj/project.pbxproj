@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		04B459BF450045368E45C5F9 /* BootSplash.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = AB78B6DC06B247889005E581 /* BootSplash.storyboard */; };
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
 		36BB30C4B22A49338A1362A2 /* Colors.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 10D4C6BA019F45368CFEB82E /* Colors.xcassets */; };
 		38535DF6B4C1C5CA9AE10581 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */; };
@@ -16,15 +17,14 @@
 		78F192772E68BCB50013AECA /* BluetoothScoModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = 78F192762E68BCB50013AECA /* BluetoothScoModule.swift */; };
 		78F192792E68BCC00013AECA /* BluetoothScoModule.m in Sources */ = {isa = PBXBuildFile; fileRef = 78F192782E68BCC00013AECA /* BluetoothScoModule.m */; };
 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
-		F9AF4E96EC5ECB96458C53FD /* libPods-OptiLens.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 39D5D5ECB6A97235D1A6A362 /* libPods-OptiLens.a */; };
-		04B459BF450045368E45C5F9 /* BootSplash.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = AB78B6DC06B247889005E581 /* BootSplash.storyboard */; };
 		B95D3A856C0A40B798B0C4BB /* Colors.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8463186106974D7BB5AE1D26 /* Colors.xcassets */; };
+		F9AF4E96EC5ECB96458C53FD /* libPods-OptiLens.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 39D5D5ECB6A97235D1A6A362 /* libPods-OptiLens.a */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		06E089789D4CB1B6783350C1 /* Pods-OptiLens.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-OptiLens.release.xcconfig"; path = "Target Support Files/Pods-OptiLens/Pods-OptiLens.release.xcconfig"; sourceTree = "<group>"; };
 		10D4C6BA019F45368CFEB82E /* Colors.xcassets */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = folder.assetcatalog; name = Colors.xcassets; path = EchoLens/Colors.xcassets; sourceTree = "<group>"; };
-		13B07F961A680F5B00A75B9A /* OptiLens.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = OptiLens.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		13B07F961A680F5B00A75B9A /* Tact-ID.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Tact-ID.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		13B07FB51A68108700A75B9A /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = EchoLens/Images.xcassets; sourceTree = "<group>"; };
 		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = EchoLens/Info.plist; sourceTree = "<group>"; };
 		13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = PrivacyInfo.xcprivacy; path = EchoLens/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
@@ -37,10 +37,10 @@
 		78F192782E68BCC00013AECA /* BluetoothScoModule.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = BluetoothScoModule.m; sourceTree = "<group>"; };
 		78F1927A2E68BCDC0013AECA /* OptiLens-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "OptiLens-Bridging-Header.h"; sourceTree = "<group>"; };
 		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = EchoLens/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		8463186106974D7BB5AE1D26 /* Colors.xcassets */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = folder.assetcatalog; name = Colors.xcassets; path = EchoLens/Colors.xcassets; sourceTree = "<group>"; };
+		AB78B6DC06B247889005E581 /* BootSplash.storyboard */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = BootSplash.storyboard; path = EchoLens/BootSplash.storyboard; sourceTree = "<group>"; };
 		DBA5C83978C1456082F15038 /* BootSplash.storyboard */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = BootSplash.storyboard; path = EchoLens/BootSplash.storyboard; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
-		AB78B6DC06B247889005E581 /* BootSplash.storyboard */ = {isa = PBXFileReference; name = "BootSplash.storyboard"; path = "EchoLens/BootSplash.storyboard"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
-		8463186106974D7BB5AE1D26 /* Colors.xcassets */ = {isa = PBXFileReference; name = "Colors.xcassets"; path = "EchoLens/Colors.xcassets"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = folder.assetcatalog; explicitFileType = undefined; includeInIndex = 0; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -109,7 +109,7 @@
 		83CBBA001A601CBA00E9B192 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				13B07F961A680F5B00A75B9A /* OptiLens.app */,
+				13B07F961A680F5B00A75B9A /* Tact-ID.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -145,7 +145,7 @@
 			);
 			name = OptiLens;
 			productName = OptiLens;
-			productReference = 13B07F961A680F5B00A75B9A /* OptiLens.app */;
+			productReference = 13B07F961A680F5B00A75B9A /* Tact-ID.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -310,7 +310,7 @@
 				DEVELOPMENT_TEAM = A3636RPZDN;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = EchoLens/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = OptiLens;
+				INFOPLIST_KEY_CFBundleDisplayName = "Tact-ID";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				IPHONEOS_DEPLOYMENT_TARGET = 16.6;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -324,7 +324,7 @@
 					"-lc++",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.optilens.app;
-				PRODUCT_NAME = OptiLens;
+				PRODUCT_NAME = "Tact-ID";
 				SWIFT_OBJC_BRIDGING_HEADER = "OptiLens-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
@@ -342,7 +342,7 @@
 				CURRENT_PROJECT_VERSION = 1000;
 				DEVELOPMENT_TEAM = A3636RPZDN;
 				INFOPLIST_FILE = EchoLens/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = OptiLens;
+				INFOPLIST_KEY_CFBundleDisplayName = "Tact-ID";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				IPHONEOS_DEPLOYMENT_TARGET = 16.6;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -356,7 +356,7 @@
 					"-lc++",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.optilens.app;
-				PRODUCT_NAME = OptiLens;
+				PRODUCT_NAME = "Tact-ID";
 				SWIFT_OBJC_BRIDGING_HEADER = "OptiLens-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
