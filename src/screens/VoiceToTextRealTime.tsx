@@ -180,12 +180,12 @@ const VoiceToTextRealtime = ({ navigation }: any) => {
     const peripheralConnected = await checkConnectedPeripheral() ?? false
     if (peripheralConnected) {
       if (selectedIn != '' && selectedOut != '') {
-        await startSco()
+        if(Platform.OS == 'android') await startSco()
         setPartialOriginal('')
         setPartialTranslated('')
 
         AudioRecord.init({
-          sampleRate: 16000,
+          sampleRate: Platform.OS === 'ios' ? 8000 : 16000,
           channels: 1,
           bitsPerSample: 16,
           wavFile: 'temp_record.wav',
@@ -203,7 +203,8 @@ const VoiceToTextRealtime = ({ navigation }: any) => {
 
   const stopRecording = async () => {
     const filePath = await AudioRecord.stop();
-    BluetoothSco.stopSco()
+    if(Platform.OS == 'android')
+      BluetoothSco.stopSco()
 
     // === Simpan ke folder Documents/TactID ===
     try {

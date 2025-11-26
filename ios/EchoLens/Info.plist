@@ -5,7 +5,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
-	<string>OptiLens</string>
+	<string>Tact-ID</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -43,18 +43,18 @@
 		<true/>
 	</dict>
 	<key>NSBluetoothAlwaysUsageDescription</key>
-	<string>OptiLens Need Bluetooth access to connect to Smart Glasses Devices.</string>
+	<string>Tact-ID Need Bluetooth access to connect to Smart Glasses Devices.</string>
 	<key>NSBonjourServices</key>
 	<array>
 		<string>_http._tcp</string>
 		<string>_https._tcp</string>
 	</array>
 	<key>NSLocalNetworkUsageDescription</key>
-	<string>OptiLens need local connection for connect to smart glasses</string>
+	<string>Tact-ID need local connection for connect to smart glasses</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>OptiLens need location access for finding nearby Devices</string>
+	<string>Tact-ID need location access for finding nearby Devices</string>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>OptiLens need Microphone access for audio recording.</string>
+	<string>Tact-ID need Microphone access for audio recording.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>This app requires access to your photo library to allow you to select profile pictures and documents.</string>
 	<key>NSSpeechRecognitionUsageDescription</key>
