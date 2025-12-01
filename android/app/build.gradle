@@ -84,7 +84,7 @@ android {
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1061
-        versionName "1.0.6beta-2"
+        versionName "1.0.6beta-3"
     }
     signingConfigs {
         release {
