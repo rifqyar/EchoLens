@@ -219,6 +219,7 @@ const LoginScreen = ({ navigation }: LoginScreenProps) => {
   useEffect(() => {
     GoogleSignin.configure({
       webClientId: webClientId,
+      iosClientId: '403993697553-j0d3m262f1lljgdrkolgaeubin7pl90l.apps.googleusercontent.com'
     })
   }, [])
 

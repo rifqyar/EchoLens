@@ -20,7 +20,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
       for input in AVAudioSession.sharedInstance().availableInputs ?? [] {
           print("🎤 Input available:", input.portType.rawValue, "-", input.portName)
       }
-  }
+  } 
   
   func application(
     _ application: UIApplication,

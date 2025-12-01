@@ -18,7 +18,6 @@
     "@react-native-masked-view/masked-view": "^0.3.2",
     "@react-native-picker/picker": "^2.11.1",
     "@react-native-vector-icons/material-design-icons": "^12.3.0",
-    "@revoiceact-native-/voice": "github:jasonz1360/voice#c33c67d",
     "@react-native/new-app-screen": "0.80.2",
     "@react-navigation/bottom-tabs": "^7.4.5",
     "@react-navigation/native": "^7.1.17",
