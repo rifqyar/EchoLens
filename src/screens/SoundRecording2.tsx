@@ -1,5 +1,14 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { View, StyleSheet, Text, Animated, TouchableOpacity, Platform, NativeModules, NativeEventEmitter } from 'react-native';
+import {
+  View,
+  StyleSheet,
+  Text,
+  Animated,
+  TouchableOpacity,
+  Platform,
+  NativeModules,
+  NativeEventEmitter,
+} from 'react-native';
 import { IconButton, Snackbar } from 'react-native-paper';
 import AudioRecord from 'react-native-audio-record';
 import { Buffer } from 'buffer';
@@ -9,9 +18,9 @@ import { COLORS } from '../assets/theme';
 import BluetoothSco from '../ble/BluetoothSco';
 
 type NotifState = {
-  visible: boolean,
-  text: string
-}
+  visible: boolean;
+  text: string;
+};
 
 const SoundRecording: React.FC = ({ navigation }: any) => {
   const [recording, setRecording] = useState<boolean>(false);
@@ -19,23 +28,60 @@ const SoundRecording: React.FC = ({ navigation }: any) => {
   const buttonScale = useRef<Animated.Value>(new Animated.Value(1)).current;
   const [notifSaved, setNotifSavedFile] = useState<NotifState>({
     visible: false,
-    text: ''
-  })
+    text: '',
+  });
+
+  const intervalRef = useRef<number | null>(null);
+  const startTimeRef = useRef<number>(0);
 
   const onDismissNotifSave = () => setNotifSavedFile({
     visible: false,
     text: ''
   })
 
-  const intervalRef = useRef<number | null>(null);
-  const startTimeRef = useRef<number>(0);
+  // -------------------------------------------
+  // 1) FIX: Pasang NativeEventEmitter sekali saja
+  // -------------------------------------------
+  const audioEmitter = new NativeEventEmitter(NativeModules.AudioRecord); // <<< FIX
+  const chunksRef = useRef<any[]>([]); // optional kalau mau pakai PCM chunks
 
-  const startRecording = async () => {
-    const startSco = async () => {
-      BluetoothSco.startSco(); // aktifkan mic Bluetooth
+  useEffect(() => {
+    const sub = audioEmitter.addListener('data', onAudioData); // <<< FIX
+    return () => sub.remove();
+  }, []);
+
+  // -------------------------------------------
+  // 2) FIX: Handler event "data"
+  // -------------------------------------------
+  const onAudioData = (data: any) => {
+    if (!data || !data.data) return;
+
+    const buffer = Buffer.from(data.data, 'base64');
+
+    // Amplitudo untuk animasi tombol
+    let maxVal = 0;
+    for (let i = 0; i < buffer.length; i += 2) {
+      const val = buffer.readInt16LE(i);
+      maxVal = Math.max(maxVal, Math.abs(val));
     }
+    const normalized = Math.min(1, maxVal / 32768);
 
-    await startSco()
+    Animated.spring(buttonScale, {
+      toValue: 1 + normalized * 0.5,
+      useNativeDriver: false,
+      friction: 3,
+    }).start();
+  };
+
+  // -------------------------------------------
+  // START RECORDING
+  // -------------------------------------------
+  const startRecording = async () => {
+    BluetoothSco.startSco(); // aktifkan mic Bluetooth
+
+    // Reset chunk
+    chunksRef.current = [];
+
     setRecording(true);
     startTimeRef.current = Date.now();
 
@@ -44,51 +90,54 @@ const SoundRecording: React.FC = ({ navigation }: any) => {
       const minutes = Math.floor(diff / 60000);
       const seconds = Math.floor((diff % 60000) / 1000);
       setRecordTime(
-        `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
+        `${minutes.toString().padStart(2, '0')}:${seconds
+          .toString()
+          .padStart(2, '0')}`
       );
     }, 100) as unknown as number;
 
+    // Init recorder (iOS = 8000Hz wajib)
     AudioRecord.init({
-      sampleRate: Platform.OS == 'android' ? 16000 : 8000,
+      sampleRate: Platform.OS === 'android' ? 16000 : 8000,
       channels: 1,
       bitsPerSample: 16,
       audioSource: 6,
       wavFile: 'temp_record.wav',
     });
+
+    // 🔥 Penting: JS event listener sudah terpasang di useEffect, aman
     AudioRecord.start();
 
-    NativeModules.AppDelegateHelper.logAudioRoute()
-
-    AudioRecord.on('data', (data: string) => {
-      const buffer = Buffer.from(data, 'base64');
-      let maxVal = 0;
-      for (let i = 0; i < buffer.length; i += 2) {
-        const val = buffer.readInt16LE(i);
-        maxVal = Math.max(maxVal, Math.abs(val));
-      }
-      const normalized = Math.min(1, maxVal / 32768);
-
-      Animated.spring(buttonScale, {
-        toValue: 1 + normalized * 0.5, // tombol membesar sesuai level
-        useNativeDriver: false,
-        friction: 3,
-      }).start();
-    });
+    // Debug output route
+    NativeModules.AppDelegateHelper?.logAudioRoute?.();
   };
 
+  // -------------------------------------------
+  // STOP RECORDING
+  // -------------------------------------------
   const stopRecording = async () => {
-    BluetoothSco.stopSco()
-    
+    BluetoothSco.stopSco();
+
     setRecording(false);
     if (intervalRef.current !== null) clearInterval(intervalRef.current);
     setRecordTime('00:00');
+
     Animated.spring(buttonScale, {
       toValue: 1,
       useNativeDriver: false,
     }).start();
-    const filePath = await AudioRecord.stop();
 
-    // === Simpan ke folder Documents/TactID ===
+    let filePath = '';
+    try {
+      filePath = await AudioRecord.stop(); // path ke temp_record.wav
+    } catch (e) {
+      console.error('STOP ERROR:', e);
+      return;
+    }
+
+    // -------------------------------------------
+    // SAVE FILE
+    // -------------------------------------------
     try {
       const timestamp = Date.now();
       const fileName = `recording-${timestamp}.wav`;
@@ -101,29 +150,22 @@ const SoundRecording: React.FC = ({ navigation }: any) => {
       const folderText = `${basePath}/Text`;
       const destPath = `${folderPath}/${fileName}`;
 
-      // pastikan folder ada
       const exists = await RNFS.exists(folderPath);
-      if (!exists) {
-        await RNFS.mkdir(folderPath);
-        console.log('📁 Folder created:', folderPath);
-      }
+      if (!exists) await RNFS.mkdir(folderPath);
 
-      // pastikan folder ada
       const existsText = await RNFS.exists(folderText);
-      if (!existsText) {
-        await RNFS.mkdir(folderText);
-        console.log('📁 Folder created:', folderText);
-      }
+      if (!existsText) await RNFS.mkdir(folderText);
 
       await RNFS.moveFile(filePath, destPath);
+
       setNotifSavedFile({
         visible: true,
-        text: '📂 File moved to: ' + destPath
-      })
+        text: '📂 File moved to: ' + destPath,
+      });
 
       console.log('📂 File moved to:', destPath);
     } catch (err) {
-      console.error('❌ Gagal simpan file:', err);
+      console.error('❌ Save file error:', err);
     }
   };
 

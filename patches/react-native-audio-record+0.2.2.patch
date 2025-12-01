@@ -1,0 +1,34 @@
+diff --git a/node_modules/react-native-audio-record/ios/RNAudioRecord.m b/node_modules/react-native-audio-record/ios/RNAudioRecord.m
+index 7304653..9db7b93 100644
+--- a/node_modules/react-native-audio-record/ios/RNAudioRecord.m
++++ b/node_modules/react-native-audio-record/ios/RNAudioRecord.m
+@@ -30,7 +30,28 @@ @implementation RNAudioRecord
+ 
+     // most audio players set session category to "Playback", record won't work in this mode
+     // therefore set session category to "Record" before recording
+-    [[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryRecord error:nil];
++    // [[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryRecord error:nil];
++    // FIX: Gunakan PlayAndRecord + AllowBluetooth + Mode voiceChat
++    AVAudioSession *session = [AVAudioSession sharedInstance];
++
++    [session setCategory:AVAudioSessionCategoryPlayAndRecord
++             withOptions:AVAudioSessionCategoryOptionAllowBluetooth |
++                         AVAudioSessionCategoryOptionAllowBluetoothA2DP |
++                         AVAudioSessionCategoryOptionDefaultToSpeaker
++                   error:nil];
++
++    [session setMode:AVAudioSessionModeVoiceChat error:nil];
++    [session setActive:YES error:nil];
++
++    // Jika preferredInput sudah diset dari AppDelegate, biarkan
++    // jika tidak, cari Bluetooth HFP sekarang
++    NSArray *inputs = session.availableInputs;
++    for (AVAudioSessionPortDescription *port in inputs) {
++        if ([port.portType isEqualToString:AVAudioSessionPortBluetoothHFP]) {
++            [session setPreferredInput:port error:nil];
++            break;
++        }
++    }
+ 
+     _recordState.mIsRunning = true;
+     _recordState.mCurrentPacket = 0;

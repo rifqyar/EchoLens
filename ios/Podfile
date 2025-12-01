@@ -1,3 +1,49 @@
+# # Resolve react_native_pods.rb with node to allow for hoisting
+# require Pod::Executable.execute_command('node', ['-p',
+#   'require.resolve(
+#     "react-native/scripts/react_native_pods.rb",
+#     {paths: [process.argv[1]]},
+#   )', __dir__]).strip
+
+# platform :ios, min_ios_version_supported
+
+# pod 'FirebaseCoreInternal', :modular_headers => true
+# pod 'GoogleUtilities', :modular_headers => true
+# pod 'FirebaseCore', :modular_headers => true
+
+# prepare_react_native_project!
+
+# linkage = ENV['USE_FRAMEWORKS']
+# if linkage != nil
+#   Pod::UI.puts "Configuring Pod with #{linkage}ally linked Frameworks".green
+#   use_frameworks! :linkage => linkage.to_sym
+# end
+
+# target 'TactID' do
+#   config = use_native_modules!
+  
+#   # REMOVE react-native-bluetooth-classic from iOS build
+#   if config[:pods].include?('react-native-bluetooth-classic')
+#     config[:pods].delete('react-native-bluetooth-classic')
+#   end
+
+#   use_react_native!(
+#     :path => config[:reactNativePath],
+#     # An absolute path to your application root.
+#     :app_path => "#{Pod::Config.instance.installation_root}/.."
+#   )
+
+#   post_install do |installer|
+#     # https://github.com/facebook/react-native/blob/main/packages/react-native/scripts/react_native_pods.rb#L197-L202
+#     react_native_post_install(
+#       installer,
+#       config[:reactNativePath],
+#       :mac_catalyst_enabled => false,
+#       # :ccache_enabled => true
+#     )
+#   end
+# end
+
 # Resolve react_native_pods.rb with node to allow for hoisting
 require Pod::Executable.execute_command('node', ['-p',
   'require.resolve(
@@ -19,22 +65,43 @@ if linkage != nil
   use_frameworks! :linkage => linkage.to_sym
 end
 
-target 'OptiLens' do
+target 'TactID' do
   config = use_native_modules!
+
+  #
+  # 🔥 SAFE CHECK: Only modify if config[:pods] exists
+  #
+  if config.key?(:pods) && config[:pods].is_a?(Hash)
+    if config[:pods].include?('react-native-bluetooth-classic')
+      puts "=== Removing react-native-bluetooth-classic from autolink config ==="
+      config[:pods].delete('react-native-bluetooth-classic')
+    end
+  else
+    puts "=== WARNING: config[:pods] tidak ada, skip autolink removal ==="
+  end
 
   use_react_native!(
     :path => config[:reactNativePath],
-    # An absolute path to your application root.
     :app_path => "#{Pod::Config.instance.installation_root}/.."
   )
 
+  #
+  # 🔥 HARD BLOCK: Prevent pod from being installed even if discovered
+  #
+  pre_install do |installer|
+    installer.pod_targets.each do |pod|
+      if pod.name == 'react-native-bluetooth-classic'
+        Pod::UI.puts "=== FORCE BLOCKING react-native-bluetooth-classic ==="
+        pod.root_spec.attributes_hash.delete('ios')
+      end
+    end
+  end
+
   post_install do |installer|
-    # https://github.com/facebook/react-native/blob/main/packages/react-native/scripts/react_native_pods.rb#L197-L202
     react_native_post_install(
       installer,
       config[:reactNativePath],
       :mac_catalyst_enabled => false,
-      # :ccache_enabled => true
     )
   end
 end
