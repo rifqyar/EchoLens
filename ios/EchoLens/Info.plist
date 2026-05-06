@@ -52,15 +52,13 @@
 		<string>_https._tcp</string>
 	</array>
 	<key>NSLocalNetworkUsageDescription</key>
-	<string>Tact-ID need local connection for connect to smart glasses</string>
+	<string>Tact-ID needs access to devices on your local network to discover and connect to compatible hardware used by the app.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Tact-ID need location access for finding nearby Devices</string>
+	<string>Tact-ID uses your location while the app is open to enable location-based features and improve device connectivity.</string>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>Tact-ID need Microphone access for audio recording.</string>
+	<string>Tact-ID uses the microphone to record audio. Your recordings can be saved as regular audio files or processed to automatically generate transcriptions and translations, depending on the feature you choose.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>This app requires access to your photo library to allow you to select profile pictures and documents.</string>
-	<key>NSSpeechRecognitionUsageDescription</key>
-	<string>This app requires access to speech recognition to allow you to use voice commands.</string>
 	<key>RCTNewArchEnabled</key>
 	<true/>
 	<key>UIAppFonts</key>

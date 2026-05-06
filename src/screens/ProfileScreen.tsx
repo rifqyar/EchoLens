@@ -6,6 +6,9 @@ import LinearGradient from 'react-native-linear-gradient';
 import { ScreenLayout } from '../components/layout/ScreenLayout';
 import { COLORS } from '../assets/theme';
 import MaterialDesignIcons from '@react-native-vector-icons/material-design-icons';
+import { GoogleSignin } from '@react-native-google-signin/google-signin';
+import { appleAuth } from '@invertase/react-native-apple-authentication';
+
 
 type User = {
   name: string;
@@ -29,7 +32,7 @@ const ProfileScreen = ({ navigation }: ProfileScreenProps) => {
         console.log(jsonValue)
         if (jsonValue != null) {
           var userJson = JSON.parse(jsonValue)
-          if(Platform.OS === 'android'){
+          if (Platform.OS === 'android') {
             userJson.name = userJson.name.split(" ");
             userJson.name = userJson.name.reverse().join(" ")
           }
@@ -81,6 +84,63 @@ const ProfileScreen = ({ navigation }: ProfileScreenProps) => {
           onPress: async () => {
             await AsyncStorage.removeItem('user');
             navigation.replace('Login'); // arahkan ke screen login
+          }
+        }
+      ]
+    );
+  };
+
+  const handleDeleteAccount = async () => {
+    Alert.alert(
+      "Delete Account",
+      "Your account login (Google/Apple) will be removed from this app. Continue?",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              const jsonValue = await AsyncStorage.getItem("user");
+              if (!jsonValue) return;
+
+              const userData = JSON.parse(jsonValue);
+
+              // --- DELETE ACCOUNT GOOGLE ---
+              if (userData.provider === "google") {
+                try {
+                  await GoogleSignin.revokeAccess(); // revoke Google credential
+                  await GoogleSignin.signOut();
+                  console.log("Google revoke success");
+                } catch (error) {
+                  console.log("Google revoke error:", error);
+                }
+              }
+
+              // --- DELETE ACCOUNT APPLE ---
+              if (userData.provider === "apple") {
+                try {
+                  // Cukup logout di client. Tidak perlu revoke.
+                  await appleAuth.performRequest({
+                    requestedOperation: appleAuth.Operation.LOGOUT,
+                  });
+
+                  console.log("Apple local logout complete");
+                } catch (error) {
+                  // LOGOUT Apple sering gagal di Android — aman untuk di-ignore
+                  console.log("Apple logout error:", error);
+                }
+              }
+
+              // --- Hapus data lokal aplikasi ---
+              await AsyncStorage.removeItem("user");
+
+              // Kembali ke halaman login
+              navigation.replace("Login");
+
+            } catch (error) {
+              console.log("Delete Account error:", error);
+            }
           }
         }
       ]
@@ -150,6 +210,14 @@ const ProfileScreen = ({ navigation }: ProfileScreenProps) => {
           </LinearGradient>
         </View>
 
+        {/* Delete Account Button */}
+        <TouchableOpacity
+          style={styles.deleteButton}
+          onPress={handleDeleteAccount}
+        >
+          <Text style={styles.deleteText}>Delete Account</Text>
+        </TouchableOpacity>
+
         {/* Logout Button */}
         <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
           <Text style={styles.logoutText}>Logout</Text>
@@ -160,6 +228,18 @@ const ProfileScreen = ({ navigation }: ProfileScreenProps) => {
 };
 
 const styles = StyleSheet.create({
+  deleteButton: {
+    marginTop: 10,
+    paddingVertical: 12,
+    borderRadius: 12,
+    backgroundColor: '#d9534f',
+    alignItems: 'center',
+  },
+  deleteText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
   container: {
     flex: 1,
     padding: 16,

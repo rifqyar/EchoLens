@@ -143,6 +143,7 @@ export async function onAppleButtonPress(
       email: email,
       name: userName,
       photo: null,
+      provider: 'apple'
     }
 
     await AsyncStorage.setItem(
@@ -242,6 +243,7 @@ const LoginScreen = ({ navigation }: LoginScreenProps) => {
           email: user?.email,
           name: user?.familyName + ' ' + user?.givenName,
           photo: user?.photo,
+          provider: 'google'
         }
 
         await AsyncStorage.setItem(
