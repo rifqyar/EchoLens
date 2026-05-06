@@ -108,7 +108,7 @@ const VoiceToTextRealtime = ({ navigation }: any) => {
 
   const connectToWs = async (jobId: any): Promise<void> => {
     return new Promise((resolve, reject) => {
-      ws.current = new WebSocket(`wss://optilens.rekayasadigital.com/ws/status/${jobId}`);
+      ws.current = new WebSocket(`wss://optilens.siapsistem.com/ws/status/${jobId}`);
       // ws.current = new WebSocket(`ws://182.253.172.27:30080/ws/status/${jobId}`);
       // ws.current = new WebSocket(`ws://172.20.10.2:4053/ws/status/${jobId}`);
 
@@ -120,7 +120,7 @@ const VoiceToTextRealtime = ({ navigation }: any) => {
       ws.current.onmessage = async (e) => {
         const msg = JSON.parse(e.data);
 
-        console.log(msg)
+        console.log(e)
 
         switch (msg.status) {
           case 'uploading':
@@ -259,13 +259,18 @@ const VoiceToTextRealtime = ({ navigation }: any) => {
           formData.append("job_id", timestamp);
 
           // const response = await fetch("http://172.20.10.2:4053/upload", {
-          const response = await fetch("https://optilens.rekayasadigital.com/upload", {
+          const response = await fetch("https://optilens.siapsistem.com/upload", {
             method: "POST",
             headers: {
               "Content-Type": "multipart/form-data",
             },
             body: formData,
           });
+
+          if (!response.ok) {
+            const errorBody = await response.text();
+            throw new Error(`Server Error ${response.status}: ${errorBody}`);
+          }
 
           const result = await response.json();
           console.log("✅ Upload result:", result);

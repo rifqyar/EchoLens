@@ -42,7 +42,7 @@ import LoadingScreen from '../components/common/LoadingScreen';
 import { connectToBluetoothClassic, scanBluetoothClassic } from '../ble/BLEManager';
 import { BluetoothDevice } from 'react-native-bluetooth-classic';
 
-const SECONDS_TO_SCAN_FOR = 3;
+const SECONDS_TO_SCAN_FOR = 5;
 const SERVICE_UUIDS: string[] = [];
 const ALLOW_DUPLICATES = false;
 
@@ -129,9 +129,12 @@ const ScanDevicesScreen = () => {
     setPeripherals((map) => {
       console.info('Loop Data Peripheral', peripheral);
       if (
-        // peripheral.name?.includes('MO1') ||
-        // peripheral.name?.includes('MO1') ||
-        peripheral.name?.includes('Bluetrum') || peripheral.id == '41:42:E7:76:55:7C'
+        peripheral.name?.includes('MO1') ||
+        peripheral.name?.includes('M01') ||
+        peripheral.name?.includes('M02') ||
+        peripheral.name?.includes('MO2') ||
+        (peripheral.name?.includes('Bluetrum') || peripheral.id == '41:42:E7:76:55:7C') || 
+        (peripheral.name?.includes('Spectra') || peripheral.id == '41:42:FF:8E:79:9D')
       ) {
         const newMap = new Map(map);
         newMap.set(peripheral.id, peripheral);
