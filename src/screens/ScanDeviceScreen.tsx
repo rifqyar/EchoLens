@@ -40,9 +40,10 @@ import { loading, notLoading } from '../redux/actions/loadingAction';
 import { LoadingIndicator } from '../components/common/LoadingIndicator';
 import LoadingScreen from '../components/common/LoadingScreen';
 import { connectToBluetoothClassic, scanBluetoothClassic } from '../ble/BLEManager';
-import { BluetoothDevice } from 'react-native-bluetooth-classic';
+import RNBluetoothClassic, { BluetoothDevice } from 'react-native-bluetooth-classic';
+import { isBLEDeviceAllowed, isClassicDeviceAllowed } from '../config/DeviceWhitelist';
 
-const SECONDS_TO_SCAN_FOR = 5;
+const SECONDS_TO_SCAN_FOR = 3;
 const SERVICE_UUIDS: string[] = [];
 const ALLOW_DUPLICATES = false;
 
@@ -68,6 +69,14 @@ const ScanDevicesScreen = () => {
   const [targetDevices, setTargetDevices] = useState<BluetoothDevice[]>([]);
   const dispacth = useDispatch()
   const isLoading = useAppSelector(state => state.loading.loading)
+
+  const handleScan = () => {
+    if (Platform.OS === 'android') {
+      startScanBluetootClassic();
+    } else {
+      startScan();
+    }
+  };
 
   const startScan = () => {
     if (!isScanning) {
@@ -125,17 +134,9 @@ const ScanDevicesScreen = () => {
       peripheral.name = 'NO NAME';
     }
 
-    // Mac Address 41:42:FF:8E:79:9D
     setPeripherals((map) => {
       console.info('Loop Data Peripheral', peripheral);
-      if (
-        peripheral.name?.includes('MO1') ||
-        peripheral.name?.includes('M01') ||
-        peripheral.name?.includes('M02') ||
-        peripheral.name?.includes('MO2') ||
-        (peripheral.name?.includes('Bluetrum') || peripheral.id == '41:42:E7:76:55:7C') || 
-        (peripheral.name?.includes('Spectra') || peripheral.id == '41:42:FF:8E:79:9D')
-      ) {
+      if (isBLEDeviceAllowed(peripheral.name, peripheral.id)) {
         const newMap = new Map(map);
         newMap.set(peripheral.id, peripheral);
         return newMap;
@@ -179,7 +180,7 @@ const ScanDevicesScreen = () => {
         });
 
         await BleManager.connect(peripheral.id);
-        if(Platform.OS == 'android'){
+        if (Platform.OS == 'android') {
           await initStartScan(peripheral.id, peripheral.name);
         }
 
@@ -345,7 +346,7 @@ const ScanDevicesScreen = () => {
     setPeripherals(new Map<Peripheral['id'], Peripheral>());
     if (isFocused) {
       console.info('Screen Focused, Started Scanning Devices')
-      startScan()
+      handleScan()
     }
 
     return () => {
@@ -401,20 +402,44 @@ const ScanDevicesScreen = () => {
   };
 
   const startScanBluetootClassic = async () => {
-    setIsScanning(true)
-    const result = await scanBluetoothClassic()
+    setIsScanning(true);
 
-    const targets = result.filter((d) => d.name === 'MO1');
-    if (targets.length > 0) {
-      console.log(`🎯 Ditemukan ${targets.length} device bernama MO1`);
-      setTargetDevices(targets); // simpan ke state khusus target device
-      setIsScanning(false)
-    } else {
-      console.log('⚠️ Tidak ada device M01 ditemukan.');
-      setIsScanning(false)
-      setTargetDevices([]);
+    // 1. Ambil perangkat yang sudah ter-pairing (bonded) secara instan (0 detik!)
+    try {
+      const pairedDevices = await RNBluetoothClassic.getBondedDevices();
+      const pairedTargets = pairedDevices.filter((d) => isClassicDeviceAllowed(d.name));
+      if (pairedTargets.length > 0) {
+        console.log(`🎯 Ditemukan ${pairedTargets.length} paired device instan`);
+        setTargetDevices(pairedTargets);
+        // Hentikan spinner loading lebih cepat jika perangkat ter-pairing langsung ditemukan
+        setIsScanning(false);
+      } else {
+        setTargetDevices([]);
+      }
+    } catch (pairedErr) {
+      console.warn('[Bluetooth] Gagal memuat paired devices:', pairedErr);
     }
-  }
+
+    // 2. Jalankan pencarian discovery di sekitar secara paralel
+    try {
+      const result = await scanBluetoothClassic();
+      const targets = result.filter((d) => isClassicDeviceAllowed(d.name));
+
+      setTargetDevices((prev) => {
+        const combined = [...prev];
+        targets.forEach((newDev) => {
+          if (!combined.some((d) => d.address === newDev.address)) {
+            combined.push(newDev);
+          }
+        });
+        return combined;
+      });
+    } catch (err) {
+      console.error('[Bluetooth] Pencarian Bluetooth Classic gagal:', err);
+    } finally {
+      setIsScanning(false);
+    }
+  };
 
   const renderItem = ({ item }: { item: Peripheral }) => {
     return (
@@ -550,36 +575,54 @@ const ScanDevicesScreen = () => {
             <Text style={{ color: '#d7d7d7ff', textAlign: 'center', marginBottom: 20 }}>
               Please make sure your device is on and in pairing mode.
             </Text>
-            <Button mode="contained" onPress={startScan}>
+            <Button mode="contained" onPress={handleScan}>
               Retry
             </Button>
 
-            {/* <TouchableOpacity style={{
+            <TouchableOpacity style={{
               alignItems: 'center',
               justifyContent: 'center',
               marginTop: 20
             }}
-              onPress={startScanBluetootClassic}
+              onPress={Platform.OS === 'android' ? startScan : startScanBluetootClassic}
             >
-              <Text style={{ color: COLORS.primary }}>Or Retry it With Bluetooth Classic</Text>
-            </TouchableOpacity> */}
+              <Text style={{ color: COLORS.primary }}>
+                {Platform.OS === 'android' ? 'Or Try Scanning with Bluetooth BLE' : 'Or Try Scanning with Bluetooth Classic'}
+              </Text>
+            </TouchableOpacity>
           </View>
-        ) : Array.from(peripherals.values()).length > 0 ? (
-          <FlatList
-            data={Array.from(peripherals.values())}
-            contentContainerStyle={{ rowGap: 12 }}
-            renderItem={renderItem}
-            keyExtractor={(item) => item.id}
-          />
-        ) : targetDevices.length > 0 ? (
-          <>
+        ) : (Platform.OS === 'android' ? targetDevices.length > 0 : Array.from(peripherals.values()).length > 0) ? (
+          Platform.OS === 'android' ? (
             <FlatList
               data={targetDevices}
               contentContainerStyle={{ rowGap: 12 }}
               renderItem={renderItemClassic}
               keyExtractor={(item) => item.id}
             />
-          </>
+          ) : (
+            <FlatList
+              data={Array.from(peripherals.values())}
+              contentContainerStyle={{ rowGap: 12 }}
+              renderItem={renderItem}
+              keyExtractor={(item) => item.id}
+            />
+          )
+        ) : (Platform.OS === 'android' ? Array.from(peripherals.values()).length > 0 : targetDevices.length > 0) ? (
+          Platform.OS === 'android' ? (
+            <FlatList
+              data={Array.from(peripherals.values())}
+              contentContainerStyle={{ rowGap: 12 }}
+              renderItem={renderItem}
+              keyExtractor={(item) => item.id}
+            />
+          ) : (
+            <FlatList
+              data={targetDevices}
+              contentContainerStyle={{ rowGap: 12 }}
+              renderItem={renderItemClassic}
+              keyExtractor={(item) => item.id}
+            />
+          )
         ) : (
           <></>
         )
