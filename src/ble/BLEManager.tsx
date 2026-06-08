@@ -2,6 +2,7 @@
 import RNBluetoothClassic, { BluetoothDevice } from 'react-native-bluetooth-classic';
 import { PermissionsAndroid, Platform, NativeEventEmitter, NativeModules } from 'react-native';
 import BleManager from 'react-native-ble-manager';
+import { isClassicDeviceAllowed } from '../config/DeviceWhitelist';
 
 const BleManagerModule = NativeModules.BleManager;
 const bleEmitter = new NativeEventEmitter(BleManagerModule);
@@ -64,14 +65,38 @@ export type Discovered = {
 
 export async function scanBluetoothClassic(): Promise<BluetoothDevice[]> {
   // Stop discovery kalau masih jalan
-  const isDiscovering = await RNBluetoothClassic.cancelDiscovery();
-  if (isDiscovering) {
-    console.log('🔹 Discovery masih jalan, menghentikan...');
-    await RNBluetoothClassic.cancelDiscovery();
+  try {
+    const active = await RNBluetoothClassic.isDiscovering();
+    if (active) {
+      await RNBluetoothClassic.cancelDiscovery();
+    }
+  } catch (e) {
+    console.log('Gagal menghentikan discovery awal:', e);
   }
 
   console.log('=== Mulai discovery perangkat Bluetooth Classic ===');
-  const devices: BluetoothDevice[] = await RNBluetoothClassic.startDiscovery();
+
+  // ⏱️ Batalkan discovery secara otomatis setelah 3 detik agar cepat selesai!
+  const scanTimeout = setTimeout(async () => {
+    try {
+      const active = await RNBluetoothClassic.isDiscovering();
+      if (active) {
+        console.log('⏱️ Discovery sudah berjalan 3 detik, dihentikan agar cepat...');
+        await RNBluetoothClassic.cancelDiscovery();
+      }
+    } catch (e) {
+      console.log('Gagal membatalkan discovery via timeout:', e);
+    }
+  }, 3000);
+
+  let devices: BluetoothDevice[] = [];
+  try {
+    devices = await RNBluetoothClassic.startDiscovery();
+  } catch (err) {
+    console.error('Error saat startDiscovery:', err);
+  } finally {
+    clearTimeout(scanTimeout);
+  }
 
   console.log(`Ditemukan ${devices.length} perangkat:`);
   devices.forEach((device) => {
@@ -141,7 +166,7 @@ export const checkBondedClassicPeripheral = async (): Promise<BluetoothDevice[]>
   try {
     const pairedDevices: BluetoothDevice[] = await RNBluetoothClassic.getBondedDevices();
 
-    const availDevice = pairedDevices.filter((d) => d.name === 'MO1');
+    const availDevice = pairedDevices.filter((d) => isClassicDeviceAllowed(d.name));
     if(availDevice.length > 0){
       await RNBluetoothClassic.connectToDevice(availDevice[0].address)
     }

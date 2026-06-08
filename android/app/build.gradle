@@ -83,8 +83,8 @@ android {
         applicationId "com.optilens"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 1061
-        versionName "1.0.6"
+        versionCode 1062
+        versionName "1.0.8"
     }
     signingConfigs {
         release {

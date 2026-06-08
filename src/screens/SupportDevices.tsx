@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -17,9 +17,15 @@ import { ScreenLayout } from "../components/layout/ScreenLayout";
 import { COLORS } from "../assets/theme";
 import { SectionLayout } from "../components/layout/SectionLayout";
 import { Surface, useTheme } from "react-native-paper";
+import { getCachedDevices, DeviceConfig } from "../config/DeviceWhitelist";
 
 const SupportDevices: React.FC = () => {
   const theme = useTheme()
+  const [devices, setDevices] = useState<DeviceConfig[]>([])
+
+  useEffect(() => {
+    setDevices(getCachedDevices())
+  }, [])
 
   return (
     <>
@@ -30,22 +36,21 @@ const SupportDevices: React.FC = () => {
             <Text style={{ fontSize: 18, fontWeight: 'bold', color: theme.colors.surface }}>
               Supported Devices
             </Text>
-            <Surface style={styles.statusContainer}>
-              <View style={styles.glassesContainer}>
-                <Image source={require('../assets/img/logo-alt.png')} style={styles.glassesImage} />
-                <Text style={styles.glassesName}>
-                  Sentinel
-                </Text>
-              </View>
-            </Surface>
-            <Surface style={styles.statusContainer}>
-              <View style={styles.glassesContainer}>
-                <Image source={require('../assets/img/logo-alt.png')} style={styles.glassesImage} />
-                <Text style={styles.glassesName}>
-                  Spectra
-                </Text>
-              </View>
-            </Surface>
+            {devices.map((device, idx) => (
+              <Surface key={idx} style={styles.statusContainer}>
+                <View style={styles.glassesContainer}>
+                  <Image source={require('../assets/img/logo-alt.png')} style={styles.glassesImage} />
+                  <Text style={styles.glassesName}>
+                    {device.name}
+                  </Text>
+                  {device.macs.length > 0 && (
+                    <Text style={styles.glassesMac}>
+                      {device.macs.join(', ')}
+                    </Text>
+                  )}
+                </View>
+              </Surface>
+            ))}
           </SectionLayout>
         </View>
       </ScreenLayout>
@@ -70,4 +75,5 @@ const styles = StyleSheet.create({
   glassesContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   glassesImage: { width: '70%', height: 100, resizeMode: 'contain' },
   glassesName: { fontSize: 18, fontWeight: 'bold', color: COLORS.white },
+  glassesMac: { fontSize: 12, color: COLORS.white, opacity: 0.7, marginTop: 4 },
 })

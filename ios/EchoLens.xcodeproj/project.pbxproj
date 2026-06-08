@@ -302,7 +302,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = EchoLens/EchoLens.entitlements;
-				CURRENT_PROJECT_VERSION = 1017;
+				CURRENT_PROJECT_VERSION = 1018;
 				DEVELOPMENT_TEAM = A3636RPZDN;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = EchoLens/Info.plist;
@@ -313,7 +313,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0.7;
+				MARKETING_VERSION = 1.0.8;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
@@ -335,7 +335,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = EchoLens/EchoLens.entitlements;
-				CURRENT_PROJECT_VERSION = 1017;
+				CURRENT_PROJECT_VERSION = 1018;
 				DEVELOPMENT_TEAM = A3636RPZDN;
 				INFOPLIST_FILE = EchoLens/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Tact-ID";
@@ -345,7 +345,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0.7;
+				MARKETING_VERSION = 1.0.8;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",

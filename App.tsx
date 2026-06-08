@@ -6,6 +6,7 @@ import { MD3LightTheme, PaperProvider } from 'react-native-paper';
 import AppProvider from './src/provider/AppProvider';
 import { Provider } from 'react-redux';
 import store from './src/redux/store';
+import { initDeviceWhitelist } from './src/config/DeviceWhitelist';
 
 function App(): React.JSX.Element {
   const theme = {
@@ -26,6 +27,7 @@ function App(): React.JSX.Element {
 
     checkAppVersion()
     const init = async () => {
+      await initDeviceWhitelist();
       await requestMicrophonePermission();
       await requestPermissionSpeech();
       await requestPermissionBluetooth();
@@ -105,17 +107,25 @@ function App(): React.JSX.Element {
 
   async function requestPermissionBluetooth() {
     if (Platform.OS === 'android') {
-      const granted = await PermissionsAndroid.requestMultiple([
-        PermissionsAndroid.PERMISSIONS.BLUETOOTH_SCAN,
-        PermissionsAndroid.PERMISSIONS.BLUETOOTH_CONNECT,
-        PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
-      ]);
+      try {
+        const granted = await PermissionsAndroid.requestMultiple([
+          PermissionsAndroid.PERMISSIONS.BLUETOOTH_SCAN,
+          PermissionsAndroid.PERMISSIONS.BLUETOOTH_CONNECT,
+          PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+        ]);
 
-      const allGranted = Object.values(granted).every(status => status === PermissionsAndroid.RESULTS.GRANTED);
-      if (!allGranted) {
-        throw new Error('Bluetooth permissions not granted');
+        const allGranted = Object.values(granted).every(status => status === PermissionsAndroid.RESULTS.GRANTED);
+        if (!allGranted) {
+          console.warn('[Bluetooth] Some permissions not granted, BLE features may not work.');
+          return false;
+        }
+        return true;
+      } catch (err) {
+        console.warn('[Bluetooth] Error requesting permissions:', err);
+        return false;
       }
     }
+    return true;
   }
 
   const checkAppVersion = async () => {
