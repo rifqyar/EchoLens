@@ -363,25 +363,26 @@ const ScanDevicesScreen = () => {
     setIsScanning(true);
 
     // 1. Ambil perangkat yang sudah ter-pairing (bonded) secara instan (0 detik!)
-    try {
-      const pairedDevices = await RNBluetoothClassic.getBondedDevices();
-      const pairedTargets = pairedDevices.filter((d) => isClassicDeviceAllowed(d.name));
-      if (pairedTargets.length > 0) {
-        console.log(`🎯 Ditemukan ${pairedTargets.length} paired device instan`);
-        setTargetDevices(pairedTargets);
-        // Hentikan spinner loading lebih cepat jika perangkat ter-pairing langsung ditemukan
-        setIsScanning(false);
-      } else {
-        setTargetDevices([]);
-      }
-    } catch (pairedErr) {
-      console.warn('[Bluetooth] Gagal memuat paired devices:', pairedErr);
-    }
+    // try {
+    //   const pairedDevices = await RNBluetoothClassic.getBondedDevices();
+    //   const pairedTargets = pairedDevices.filter((d) => isClassicDeviceAllowed(d.name));
+    //   if (pairedTargets.length > 0) {
+    //     console.log(`🎯 Ditemukan ${pairedTargets.length} paired device instan`);
+    //     setTargetDevices(pairedTargets);
+    //     // Hentikan spinner loading lebih cepat jika perangkat ter-pairing langsung ditemukan
+    //     setIsScanning(false);
+    //   } else {
+    //     setTargetDevices([]);
+    //   }
+    // } catch (pairedErr) {
+    //   console.warn('[Bluetooth] Gagal memuat paired devices:', pairedErr);
+    // }
 
     // 2. Jalankan pencarian discovery di sekitar secara paralel
     try {
       const result = await scanBluetoothClassic();
       const targets = result.filter((d) => isClassicDeviceAllowed(d.name));
+      console.log(targets)
 
       setTargetDevices((prev) => {
         const combined = [...prev];
