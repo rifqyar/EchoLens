@@ -79,7 +79,7 @@ const HomeScreen = ({ navigation }: any) => {
   const setConnectedDeviceToLocalStorage = async () => {
     if (device) {
       await AsyncStorage.setItem('deviceConnect', JSON.stringify(device))
-      getBatteryStatus(device)
+      getBatteryStatus(device as any)
     }
   }
 

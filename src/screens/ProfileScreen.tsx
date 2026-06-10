@@ -200,7 +200,7 @@ const ProfileScreen = ({ navigation }: ProfileScreenProps) => {
             colors={[COLORS.background, COLORS.tertiary]}
             style={styles.menuCard}
           >
-          {renderMenuItem('help-circle', 'FAQ', () => {
+            {renderMenuItem('help-circle', 'FAQ', () => {
               navigation.push('FAQScreen')
             })}
             <Divider style={{ marginTop: 5 }} />
