@@ -207,16 +207,10 @@ const ProfileScreen = ({ navigation }: ProfileScreenProps) => {
             {renderMenuItem('information', 'About App', () => {
               navigation.push('AboutScreen')
             })}
+            <Divider style={{ marginTop: 5 }} />
+            {renderMenuItem('delete', 'Delete Account', handleDeleteAccount)}
           </LinearGradient>
         </View>
-
-        {/* Delete Account Button */}
-        <TouchableOpacity
-          style={styles.deleteButton}
-          onPress={handleDeleteAccount}
-        >
-          <Text style={styles.deleteText}>Delete Account</Text>
-        </TouchableOpacity>
 
         {/* Logout Button */}
         <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>

@@ -86,7 +86,10 @@ const ScanDevicesScreen = () => {
       try {
         console.log('[startScan] starting scan...');
         setIsScanning(true);
-        BleManager.scan(SERVICE_UUIDS, SECONDS_TO_SCAN_FOR, ALLOW_DUPLICATES, {
+        BleManager.scan({
+          serviceUUIDs: SERVICE_UUIDS,
+          seconds: SECONDS_TO_SCAN_FOR,
+          allowDuplicates: ALLOW_DUPLICATES,
           matchMode: BleScanMatchMode.Sticky,
           scanMode: BleScanMode.LowLatency,
           callbackType: BleScanCallbackType.AllMatches,
@@ -180,9 +183,6 @@ const ScanDevicesScreen = () => {
         });
 
         await BleManager.connect(peripheral.id);
-        if (Platform.OS == 'android') {
-          await initStartScan(peripheral.id, peripheral.name);
-        }
 
         console.log(`[connectPeripheral][${peripheral.id}] connected.`);
 
@@ -275,49 +275,7 @@ const ScanDevicesScreen = () => {
     }
   };
 
-  const initStartScan = async (peripheralId: string, peripheralName: any) => {
-    const result = await scanBluetoothClassic()
-    const prefix = peripheralId.split(":").slice(0, 5).join(":");
 
-    const targets = result.filter((d) =>
-      d.address.includes(prefix) &&
-      d.name !== peripheralName
-    )
-    console.log(targets)
-
-    if (targets.length > 0) {
-      await connectToBluetoothClassic(targets[0].address)
-
-      let newDevice = {
-        name: targets[0].name,
-        id: targets[0].id,
-        connected: true,
-        isBLE: false
-      };
-
-      let oldData = await AsyncStorage.getItem('deviceConnect');
-      let devices = [];
-
-      if (oldData) {
-        try {
-          devices = JSON.parse(oldData);
-        } catch (err) {
-          console.log('Parsing error:', err);
-          devices = [];
-        }
-      }
-
-      devices.push(newDevice);
-
-      await AsyncStorage.setItem('deviceConnect', JSON.stringify(devices));
-
-      dispacth({
-        type: 'CONNECT_DEVICE',
-        payload: devices
-      });
-
-    }
-  }
 
   function sleep(ms: number) {
     return new Promise<void>((resolve) => setTimeout(resolve, ms));
@@ -428,7 +386,8 @@ const ScanDevicesScreen = () => {
       setTargetDevices((prev) => {
         const combined = [...prev];
         targets.forEach((newDev) => {
-          if (!combined.some((d) => d.address === newDev.address)) {
+          // Dedup berdasarkan address DAN nama untuk mencegah device dual-mode muncul 2x
+          if (!combined.some((d) => d.address === newDev.address || d.name === newDev.name)) {
             combined.push(newDev);
           }
         });
@@ -578,18 +537,6 @@ const ScanDevicesScreen = () => {
             <Button mode="contained" onPress={handleScan}>
               Retry
             </Button>
-
-            <TouchableOpacity style={{
-              alignItems: 'center',
-              justifyContent: 'center',
-              marginTop: 20
-            }}
-              onPress={Platform.OS === 'android' ? startScan : startScanBluetootClassic}
-            >
-              <Text style={{ color: COLORS.primary }}>
-                {Platform.OS === 'android' ? 'Or Try Scanning with Bluetooth BLE' : 'Or Try Scanning with Bluetooth Classic'}
-              </Text>
-            </TouchableOpacity>
           </View>
         ) : (Platform.OS === 'android' ? targetDevices.length > 0 : Array.from(peripherals.values()).length > 0) ? (
           Platform.OS === 'android' ? (
@@ -604,22 +551,6 @@ const ScanDevicesScreen = () => {
               data={Array.from(peripherals.values())}
               contentContainerStyle={{ rowGap: 12 }}
               renderItem={renderItem}
-              keyExtractor={(item) => item.id}
-            />
-          )
-        ) : (Platform.OS === 'android' ? Array.from(peripherals.values()).length > 0 : targetDevices.length > 0) ? (
-          Platform.OS === 'android' ? (
-            <FlatList
-              data={Array.from(peripherals.values())}
-              contentContainerStyle={{ rowGap: 12 }}
-              renderItem={renderItem}
-              keyExtractor={(item) => item.id}
-            />
-          ) : (
-            <FlatList
-              data={targetDevices}
-              contentContainerStyle={{ rowGap: 12 }}
-              renderItem={renderItemClassic}
               keyExtractor={(item) => item.id}
             />
           )
