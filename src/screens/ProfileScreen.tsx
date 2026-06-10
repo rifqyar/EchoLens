@@ -200,23 +200,17 @@ const ProfileScreen = ({ navigation }: ProfileScreenProps) => {
             colors={[COLORS.background, COLORS.tertiary]}
             style={styles.menuCard}
           >
-            {renderMenuItem('help-circle', 'FAQ', () => {
+          {renderMenuItem('help-circle', 'FAQ', () => {
               navigation.push('FAQScreen')
             })}
             <Divider style={{ marginTop: 5 }} />
             {renderMenuItem('information', 'About App', () => {
               navigation.push('AboutScreen')
             })}
+            <Divider style={{ marginTop: 5 }} />
+            {renderMenuItem('delete', 'Delete Account', handleDeleteAccount)}
           </LinearGradient>
         </View>
-
-        {/* Delete Account Button */}
-        <TouchableOpacity
-          style={styles.deleteButton}
-          onPress={handleDeleteAccount}
-        >
-          <Text style={styles.deleteText}>Delete Account</Text>
-        </TouchableOpacity>
 
         {/* Logout Button */}
         <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>

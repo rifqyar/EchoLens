@@ -51,20 +51,29 @@ const HomeScreen = ({ navigation }: any) => {
   }, [isFocused])
 
   const checkConnectedBLE = async () => {
-    const devices = await checkBondedClassicPeripheral()
+    try {
+      const devices = await checkBondedClassicPeripheral()
 
-    let device = {
-      name: devices[0].name,
-      id: devices[0].address,
-      connected: true,
-      isBLE: false
+      if (!devices || devices.length === 0) {
+        console.log('[HomeScreen] No bonded Classic devices found')
+        return
+      }
+
+      let device = {
+        name: devices[0].name,
+        id: devices[0].address,
+        connected: true,
+        isBLE: false
+      }
+
+      dispacth({
+        type: 'CONNECT_DEVICE',
+        payload: device
+      })
+      await AsyncStorage.setItem('deviceConnect', JSON.stringify(device))
+    } catch (error) {
+      console.error('[HomeScreen] checkConnectedBLE error:', error)
     }
-
-    dispacth({
-      type: 'CONNECT_DEVICE',
-      payload: device
-    })
-    await AsyncStorage.setItem('deviceConnect', JSON.stringify(devices))
   }
 
   const setConnectedDeviceToLocalStorage = async () => {
